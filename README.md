@@ -1,4 +1,9 @@
 # Ps and Qs
-## Mind your promises with a promise queue.
+## Mind your promises with a promise queue
 
-Allows you to maintain a promise pool of size N to process promises concurrently.
+### Overview
+Zero dependency library that allows you to maintain a promise pool of size
+N to process async tasks concurrently.
+
+### Details
+
