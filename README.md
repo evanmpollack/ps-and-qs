@@ -3,11 +3,11 @@
 
 ### Overview
 Efficient, zero-dependency library that allows you to create and use a PromisePool and
-WeightedPromisePool to limit and throttle concurrency when executing a series of
-asynchronous tasks.
+WeightedPromisePool to limit promise concurrency when executing a series of
+asynchronous tasks. Useful for managing requests to downstream services.
 
 ### Details
-- PromisePool uses a standard queue that is backed by a singly linked list under the hood.
+- PromisePool uses a standard queue that is backed by a singly linked list.
 - WeightedPromisePool uses a priority queue that is backed by a max heap.
 - Event-driven pool execution process, no polling.
 
@@ -18,7 +18,7 @@ asynchronous tasks.
 // must be greater than 0
 const concurrencyLimit = 10;
 const task = async () => {
-    // unit of work
+    // work
 };
 const promiseSuppliers = [
     () => task(),
