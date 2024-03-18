@@ -11,6 +11,20 @@ asynchronous tasks. Useful for managing requests to downstream services.
 - WeightedPromisePool uses a priority queue that is backed by a max heap.
 - Event-driven pool execution process, no polling.
 
+#### Result Format
+Follows the output format of Promise.allSettled()
+```
+{
+    status: 'fulfilled',
+    value: value
+}
+
+{
+    status: 'rejected',
+    reason: message
+}
+```
+
 ### How to use
 **PromisePool**
 ```
