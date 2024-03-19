@@ -4,7 +4,7 @@
 ### Overview
 Efficient, zero-dependency library that allows you to create and use a PromisePool and
 WeightedPromisePool to limit promise concurrency when executing a series of
-asynchronous tasks. Useful for managing requests to downstream services.
+asynchronous tasks. Useful for managing requests to upstream services.
 
 ### Details
 - PromisePool uses a standard queue that is backed by a singly linked list.
