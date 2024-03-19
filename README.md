@@ -11,20 +11,6 @@ asynchronous tasks. Useful for managing requests to upstream services.
 - WeightedPromisePool uses a priority queue that is backed by a max heap.
 - Event-driven pool execution process, no polling.
 
-#### Result Format
-Follows the output format of Promise.allSettled()
-```
-{
-    status: 'fulfilled',
-    value: value
-}
-
-{
-    status: 'rejected',
-    reason: message
-}
-```
-
 ### How to use
 **PromisePool**
 ```
@@ -42,4 +28,23 @@ const promiseSuppliers = [
 
 const pPool = new PromisePool(concurrencyLimit, promiseSuppliers);
 const results = await pPool.start();
+```
+
+#### Result Format
+Follows the output format of [Promise.allSettled()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled).
+
+##### Success
+```
+{
+    status: 'fulfilled',
+    value: value
+}
+```
+
+##### Failure
+```
+{
+    status: 'rejected',
+    reason: message
+}
 ```
