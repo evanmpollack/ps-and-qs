@@ -2,16 +2,23 @@
   "name": "ps-and-qs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.mjs",
+  "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "start": "node index.mjs"
+    "test": "mocha --recursive",
+    "start": "node index.js",
+    "playground": "node playground.js",
+    "example": "node ./example/performance.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "Promise",
+    "Concurrency",
+    "Limiter",
+    "Queue"
+  ],
+  "author": "Evan Pollack",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "jest": "^29.7.0"
+    "mocha": "^10.4.0"
   }
 }
