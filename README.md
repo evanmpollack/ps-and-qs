@@ -14,7 +14,6 @@ asynchronous tasks. Useful for managing requests to upstream services.
 ### How to use
 **PromisePool**
 ```
-
 // must be greater than 0
 const concurrencyLimit = 10;
 const task = async () => {
