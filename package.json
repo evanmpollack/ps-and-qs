@@ -13,12 +13,16 @@
     "Promise",
     "Concurrency",
     "Limiter",
-    "Queue"
+    "Queue",
+    "Task",
+    "Executor",
+    "Priority Queue"
   ],
   "author": "Evan Pollack",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "sinon": "^17.0.1"
   }
 }
