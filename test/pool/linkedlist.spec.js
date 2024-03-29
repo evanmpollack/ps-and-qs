@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import LinkedList from "../../lib/pool/linkedlist.js";
+import LinkedList from '../../lib/pool/linkedlist.js';
 import Node from '../../lib/pool/node.js';
 
 /**
@@ -26,7 +26,7 @@ describe('LinkedList', function() {
         });
 
         context('when list is empty', function() {
-            it('head node should be set to tail node', function() {
+            it('head should be set to tail node', function() {
                 linkedList.insertLast(0);
                 // Test referential equality
                 assert.equal(linkedList.head(), linkedList.tail());
@@ -74,6 +74,53 @@ describe('LinkedList', function() {
             const previousSize = linkedList.size();
             linkedList.insertLast(0);
             assert.equal(linkedList.size(), previousSize + 1);
+        });
+    });
+
+    describe('#removeFirst', function() {
+        let linkedList;
+        
+        beforeEach(function() {
+            linkedList = createLinkedList();
+        });
+        
+        context('when list is empty', function() {
+            it('should throw error', function() {
+                assert.throws(linkedList.removeFirst);
+            });
+        });
+
+        context('when list is not empty', function() {
+            beforeEach(function() {
+                // Arbitrary value that satisfies n > 0
+                const n = 1;
+                populateLinkedList(linkedList, n);
+            });
+
+            it('removed node should point to null', function() {
+                const previousHead = linkedList.head();
+                linkedList.removeFirst();
+                assert.equal(previousHead.next, null);
+            });
+
+            it('head should be set to the next node', function() {
+                const next = linkedList.head().next;
+                linkedList.removeFirst();
+                assert.equal(linkedList.head(), next);
+            });
+
+            it('size should decrease by 1', function() {
+                const previousSize = linkedList.size();
+                linkedList.removeFirst();
+                assert.equal(linkedList.size(), previousSize - 1);
+            });
+
+            context('size is 1', function() {
+                it ('tail should be set to null', function() {
+                    linkedList.removeFirst();
+                    assert.equal(linkedList.tail(), null);
+                });
+            });
         });
     });
 });
