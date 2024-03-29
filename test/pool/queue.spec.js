@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import Queue from '../../lib/pool/queue.js';
 
 describe('Queue', function() { 
+    const input = [1, 2, 3, 4];
+    
     context('creation', function() {
         describe('#fromArray', function() {
-            const input = [1, 2, 3, 4];
-
             it('should maintain the order of the input array', function() {
                 const queueFromArray = Queue.fromArray(input);
                 const queueAsArray = (() => {
@@ -24,7 +24,6 @@ describe('Queue', function() {
     
     context('operation', function() {
         let queue;
-        const input = [1, 2];
         
         beforeEach(function() {
             queue = Queue.fromArray(input);
