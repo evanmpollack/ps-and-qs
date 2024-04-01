@@ -86,7 +86,12 @@ describe('LinkedList', function() {
         
         context('when list is empty', function() {
             it('should throw error', function() {
-                assert.throws(linkedList.removeFirst);
+                const expectedMessage = 'Operation not allowed on list of size 0';
+                // This bound to instance method because instance reference 
+                // is not passed in with function reference
+                assert.throws(linkedList.removeFirst.bind(linkedList), { 
+                    message: expectedMessage 
+                });
             });
         });
 
