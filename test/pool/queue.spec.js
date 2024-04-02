@@ -19,6 +19,10 @@ describe('Queue', function() {
             it('size should increase by the length of the input array', function() {
                 assert.equal(Queue.fromArray(input).size(), input.length);
             });
+
+            it('should return an empty queue if input array is empty');
+
+            it('should throw error if input is not a type of array');
         });
     })
     
