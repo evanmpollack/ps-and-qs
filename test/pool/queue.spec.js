@@ -10,7 +10,7 @@ describe('Queue', function() {
                 const queueFromArray = Queue.fromArray(input);
                 const queueAsArray = (() => {
                     const arr = [];
-                    while(queueFromArray.size()) arr.push(queueFromArray.dequeue());
+                    while(!queueFromArray.empty()) arr.push(queueFromArray.dequeue());
                     return arr;
                 })();
                 assert.deepEqual(queueAsArray, input);
@@ -36,7 +36,7 @@ describe('Queue', function() {
                 queue.enqueue(thirdElement);
                 const lastElement = (() => {
                     let curr;
-                    while(queue.size()) curr = queue.dequeue();
+                    while(!queue.empty()) curr = queue.dequeue();
                     return curr;
                 })();
                 assert.equal(lastElement, thirdElement);
@@ -77,17 +77,17 @@ describe('Queue', function() {
             });
         });
 
-        describe.skip('#empty', function() {
+        describe('#empty', function() {
             context('queue is empty', function() {
                 it('should return true', function() {
                     const emptyQueue = new Queue();
-                    assert.ok(emptyQueue.empty());
+                    assert(emptyQueue.empty());
                 });
             });
 
             context('queue is not empty', function() {
                 it('should return false', function() {
-                    assert.ok(!queue.empty());
+                    assert(!queue.empty());
                 })
             });
         });
