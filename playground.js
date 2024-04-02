@@ -1,37 +1,53 @@
-import LinkedList from "./lib/linkedlist.js";
-import Queue from "./lib/queue.js";
+import LinkedList from "./lib/pool/linkedlist.js";
+import Queue from "./lib/pool/queue.js";
+import PromisePool from "./lib/pool/promisepool.js";
 
 const ll = new LinkedList();
-
-try {
-    ll.removeFirst();
-} catch (e) {
-    console.error(e.message);
-}
-
-ll.insertLast(1);
-ll.insertLast(2);
-ll.insertLast(5);
-
-console.log(ll.toString());
-
-ll.removeFirst();
-ll.removeFirst();
-ll.removeFirst();
-
-
 const q = new Queue();
+const task = () => new Promise((_, reject) => { 
+    reject('from rejection');
+    // throw new Error('from error');
+});
+const pp = new PromisePool(2, [() => task()]);
 
-q.enqueue(1);
-q.enqueue(10);
-q.enqueue(100);
+console.log(await pp.start());
 
-console.log(q.toString());
+// try {
+//     const v = await task();
+//     console.log('Try: ' + v);
+// } catch(e) {
+//     console.log('Catch: ' + e);
+// }
 
-q.dequeue();
-q.dequeue();
-q.dequeue();
+// try {
+//     ll.removeFirst();
+// } catch (e) {
+//     console.error(e.message);
+// }
 
-console.log(q.toString());
+// ll.insertLast(1);
+// ll.insertLast(2);
+// ll.insertLast(5);
 
-q.dequeue();
+// console.log(ll.toString());
+
+// ll.removeFirst();
+// ll.removeFirst();
+// ll.removeFirst();
+
+// q.enqueue(1);
+// q.enqueue(10);
+// q.enqueue(100);
+
+// console.log(q);
+
+// q.dequeue();
+// q.dequeue();
+// q.dequeue();
+
+// console.log(q);
+
+// q.dequeue();
+
+
+// console.log(new PromisePool());
