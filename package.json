@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --recursive",
     "start": "node index.js",
-    "playground": "node playground.js",
+    "playground": "node --trace-uncaught playground.js",
     "example": "node ./example/performance.js"
   },
   "keywords": [

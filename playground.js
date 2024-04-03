@@ -5,12 +5,12 @@ import PromisePool from "./lib/pool/promisepool.js";
 const ll = new LinkedList();
 const q = new Queue();
 const task = () => new Promise((_, reject) => { 
-    reject('from rejection');
+    setTimeout(() => { throw 'hello' }, 0);
+    console.log('hi1')
     // throw new Error('from error');
 });
-const pp = new PromisePool(2, [() => task()]);
-
-console.log(await pp.start());
+const pp = new PromisePool(2, [task]);
+console.log('hi2');
 
 // try {
 //     const v = await task();
