@@ -27,26 +27,32 @@ const load = (num, task) => {
 
 describe('PromisePool', function() {
     describe('init', function() {
-        it('should throw an error if promise suppliers array is undefined', function() {
-            const expectedMessage = 'An array of promise suppliers is required';
+        it('should throw a TypeError if promise suppliers array is undefined', function() {
+            const expectedErrorType = 'TypeError';
+            const expectedMessage = 'Suppliers must be an array';
             assert.throws(() => new PromisePool(undefined), {
+                name: expectedErrorType,
                 message: expectedMessage
             });
         });
 
-        it('should throw an error if promise suppliers is not an array', function() {
-            const expectedMessage = 'An array of promise suppliers is required';
+        it('should throw an TypeError if promise suppliers is not an array', function() {
+            const expectedErrorType = 'TypeError';
+            const expectedMessage = 'Suppliers must be an array';
             assert.throws(() => new PromisePool(1), {
+                name: expectedErrorType,
                 message: expectedMessage
             });
         })
 
-        it('should throw an error if limit option <= 0', function() {
+        it('should throw an RangeError if limit option <= 0', function() {
+            const expectedErrorType = 'RangeError';
             const expectedMessage = 'Concurrency limit must be greater than 0';
             const limit = -1;
             assert.throws(() => new PromisePool([task.resolves], { 
                 concurrencyLimit: limit 
             }), {
+                name: expectedErrorType,
                 message: expectedMessage
             });
         });
@@ -68,31 +74,31 @@ describe('PromisePool', function() {
                 it('should resolve given tasks that resolve', async function() {
                     const tasks = load(numTasks, task.resolves);
                     const pool = new PromisePool(tasks);
-                    await assert.doesNotReject(pool.start);
+                    await assert.doesNotReject(pool.start.bind(pool));
                 });
 
                 it('should resolve given tasks that reject', async function() {
                     const tasks = load(numTasks, task.rejects);
                     const pool = new PromisePool(tasks);
-                    await assert.doesNotReject(pool.start);
+                    await assert.doesNotReject(pool.start.bind(pool));
                 });
 
                 it('should resolve given tasks that error', async function() {
                     const tasks = load(numTasks, task.error);
                     const pool = new PromisePool(tasks);
-                    await assert.doesNotReject(pool.start);
+                    await assert.doesNotReject(pool.start.bind(pool));
                 });
 
                 it('should resolve given tasks that are synchronous', async function() {
                     const tasks = load(numTasks, task.synchronous);
                     const pool = new PromisePool(tasks);
-                    await assert.doesNotReject(pool.start);
+                    await assert.doesNotReject(pool.start.bind(pool));
                 });
 
                 it('should resolve given tasks that aren\'t functions', async function() {
                     const tasks = load(numTasks, task.notFunction);
                     const pool = new PromisePool(tasks);
-                    await assert.doesNotReject(pool.start);
+                    await assert.doesNotReject(pool.start.bind(pool));
                 });
 
                 it('result array should be the same length as the input array', async function() {
@@ -140,7 +146,15 @@ describe('PromisePool', function() {
                 });
                 
                 it('result should have a \'reason\' property equal to the rejected value', async function() {
-                    assert.equal(results[0].reason, await task.rejects());
+                    let rejectedValue;
+                    // Wrapped in try/catch because unhandled rejections turn into errors
+                    try {
+                        await task.rejects();
+                    } catch(e) {
+                        rejectedValue = e;
+                    }
+                    
+                    assert.equal(results[0].reason, rejectedValue);
                 });
             });
         });

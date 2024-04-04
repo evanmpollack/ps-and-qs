@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import Queue from '../../lib/pool/queue.js';
 
-describe.only('Queue', function() { 
+describe('Queue', function() { 
     const input = [1, 2, 3, 4];
     
     context('creation', function() {
@@ -24,9 +24,11 @@ describe.only('Queue', function() {
                 assert.equal(Queue.fromArray([]).size(), 0);
             });
 
-            it('should throw error if input is not a type of array', function() {
+            it('should throw a TypeError if input is not a type of array', function() {
+                const expectedErrorType = 'TypeError';
                 const expectedMessage = 'Input must be an array';
                 assert.throws(() => Queue.fromArray(0), {
+                    name: expectedErrorType,
                     message: expectedMessage
                 });
             });
@@ -65,10 +67,12 @@ describe.only('Queue', function() {
                 it('should throw error', function() {
                     // Find way to condense beforeEach, goal=beforeEach is used in each test
                     const emptyQueue = new Queue();
+                    const expectedErrorType = 'Error';
                     const expectedMessage = 'Operation not allowed on queue of size 0';
                     // This bound to instance method because instance reference 
                     // is not passed in with function reference
                     assert.throws(emptyQueue.dequeue.bind(emptyQueue), { 
+                        name: expectedErrorType,
                         message: expectedMessage 
                     });
                 });
