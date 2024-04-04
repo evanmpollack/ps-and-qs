@@ -1,0 +1,7 @@
+{
+    "report-dir": "reports/coverage",
+    "reporter": [
+        "html",
+        "text-summary"
+    ]
+}
