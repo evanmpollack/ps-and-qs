@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import Queue from '../../lib/pool/queue.js';
 
-describe('Queue', function() { 
+describe.only('Queue', function() { 
     const input = [1, 2, 3, 4];
     
     context('creation', function() {
@@ -20,9 +20,16 @@ describe('Queue', function() {
                 assert.equal(Queue.fromArray(input).size(), input.length);
             });
 
-            it('should return an empty queue if input array is empty');
+            it('should return an empty queue if input array is empty', function() {
+                assert.equal(Queue.fromArray([]).size(), 0);
+            });
 
-            it('should throw error if input is not a type of array');
+            it('should throw error if input is not a type of array', function() {
+                const expectedMessage = 'Input must be an array';
+                assert.throws(() => Queue.fromArray(0), {
+                    message: expectedMessage
+                });
+            });
         });
     })
     
