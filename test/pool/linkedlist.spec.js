@@ -3,28 +3,21 @@ import LinkedList from '../../lib/pool/linkedlist.js';
 import Node from '../../lib/pool/node.js';
 
 /**
- * Helper method that creates an empty linked list.
- * @returns {LinkedList}
- */
-const createLinkedList = () => new LinkedList();
-
-/**
  * Helper method that populates a linked list with numbers in ascending order in range [0, size). 
  * Ordered for ease of testing.
  * @param {LinkedList} linkedList - LinkedList instance that needs to be populated
  * @param {Number} size - Number of elements to add
- * @returns {void}
  */
 const populateLinkedList = (linkedList, size) => Array.from({ length: size }).map((_, i) => i).forEach(i => linkedList.insertLast(i));
 
 describe('LinkedList', function() {
+    let linkedList;
+        
+    beforeEach(function() {
+        linkedList = new LinkedList();
+    });
+
     describe('#insertLast', function() {
-        let linkedList;
-
-        beforeEach(function() {
-            linkedList = createLinkedList();
-        });
-
         context('when list is empty', function() {
             it('head should be set to tail node', function() {
                 linkedList.insertLast(0);
@@ -78,12 +71,6 @@ describe('LinkedList', function() {
     });
 
     describe('#removeFirst', function() {
-        let linkedList;
-        
-        beforeEach(function() {
-            linkedList = createLinkedList();
-        });
-        
         context('when list is empty', function() {
             it('should throw error', function() {
                 const expectedErrorType = 'Error';
