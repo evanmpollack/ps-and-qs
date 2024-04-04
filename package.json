@@ -22,7 +22,6 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "mocha": "^10.4.0",
-    "sinon": "^17.0.1"
+    "mocha": "^10.4.0"
   }
 }
