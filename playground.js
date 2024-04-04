@@ -9,7 +9,9 @@ const task = () => new Promise((_, reject) => {
     console.log('hi1')
     // throw new Error('from error');
 });
-const pp = new PromisePool(2, [task]);
+const pp = new PromisePool([task], {
+    concurrencyLimit: 1
+});
 console.log('hi2');
 
 // try {
