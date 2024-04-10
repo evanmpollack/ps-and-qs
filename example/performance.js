@@ -1,4 +1,4 @@
-import PromisePool from "./lib/promisepool.mjs";
+import PromisePool from "../lib/pool/promisepool.js";
 
 const LIMIT = 100;
 const NUM_TASKS = 3000;
@@ -20,7 +20,9 @@ for (let i = 0; i < NUM_TASKS; i++) {
 
 // Pool strategy
 console.time('pool');
-const pool = new PromisePool(LIMIT, taskSuppliers);
+const pool = new PromisePool(taskSuppliers, {
+    concurrencyLimit: LIMIT
+});
 await pool.start();
 console.timeEnd('pool');
 

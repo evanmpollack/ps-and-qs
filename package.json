@@ -2,13 +2,27 @@
   "name": "ps-and-qs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.mjs",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.mjs"
+    "test": "c8 mocha --recursive",
+    "start": "node index.js",
+    "playground": "node --trace-uncaught playground.js",
+    "example": "node ./example/performance.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "Promise",
+    "Concurrency",
+    "Limiter",
+    "Queue",
+    "Task",
+    "Executor",
+    "Priority Queue"
+  ],
+  "author": "Evan Pollack",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "c8": "^9.1.0",
+    "mocha": "^10.4.0"
+  }
 }
