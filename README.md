@@ -5,7 +5,7 @@
 An efficient, zero dependency promise pool implementation that provides control over the concurrency limit when executing a series of 
 asynchronous tasks. Useful for managing requests to upstream services and more.
 
-This library is similar to other popular promise limiting solutions, like [p-limit](https://www.npmjs.com/package/p-limit), [es6-promise-pool](https://www.npmjs.com/package/es6-promise-pool), 
+This library is similar to other popular promise limiting solutions like [p-limit](https://www.npmjs.com/package/p-limit), [es6-promise-pool](https://www.npmjs.com/package/es6-promise-pool), 
 and [@supercharge/promise-pool](https://www.npmjs.com/package/@supercharge/promise-pool). It expands on those by adding support for tasks that should be executed based on priority rather 
 than insertion order.
 
@@ -28,6 +28,21 @@ const promiseSuppliers = [
 
 const pPool = new PromisePool(promiseSuppliers, options);
 const results = await pPool.start();
+```
+
+**WeightedPromisePool**
+```
+const task = async () => {
+    // work
+};
+const promiseSuppliers = [
+    { key, task },
+    { key, task }
+];
+const comparator = () => {}
+
+const wpPool = new WeightedPromisePool(promiseSuppliers, comparator, options);
+const results = await wpPool.start();
 ```
 
 #### Result Format
