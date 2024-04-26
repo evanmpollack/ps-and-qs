@@ -48,6 +48,14 @@ const wp = PromisePool
     .withConcurrency(2)
     .withTasks(tasks);
 
+const p = PromisePool
+    .withTasks(tasks2)
+    .withConcurrency(2);
+
+console.time('p');
+console.log(await p.start());
+console.timeEnd('p');
+
 console.time('wp');
 const results = await wp.start();
 console.log(results);
