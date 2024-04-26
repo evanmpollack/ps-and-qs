@@ -10,7 +10,7 @@ import { array } from '../helpers.js';
  */
 const populateQueue = (queue, arr) => arr.forEach(i => queue.enqueue(i));
 
-describe.only('Queue', function() { 
+describe('Queue', function() { 
     let queue;
 
     beforeEach(function() {
