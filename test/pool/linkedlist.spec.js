@@ -1,15 +1,7 @@
 import assert from 'node:assert/strict';
 import LinkedList from '../../lib/pool/linkedlist.js';
 import Node from '../../lib/pool/node.js';
-
-/**
- * Helper object that has all the possible array inputs needed for unit testing
- */
-const array = {
-    populated: [1, 2, 3, 4],
-    empty: [],
-    invalid: 0
-};
+import { array } from '../helpers.js';
 
 /**
  * Helper method that populates a linked list with numbers in ascending order in range [0, size). 
