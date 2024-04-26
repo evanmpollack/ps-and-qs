@@ -1,4 +1,4 @@
-import PromisePool from "./lib/promisepool.js";
+import PromisePool from './lib/promisepool.js';
 
 const task = (priority) => new Promise((resolve) => setTimeout(() => resolve(priority), 1000));
 

@@ -1,5 +1,5 @@
-import PromisePool from "../lib/pool/promisepool.js";
-import WeightedPromisePool from "../lib/weightedpool/weightedpromisepool.js";
+import PromisePool from '../lib/pool/promisepool.js';
+import WeightedPromisePool from '../lib/weightedpool/weightedpromisepool.js';
 
 const LIMIT = 100;
 const NUM_TASKS = 3000;
