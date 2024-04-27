@@ -41,15 +41,13 @@ const tasks = [
     }
 ];
 
-const tasks2 = Array.from(tasks);
-
 const wp = PromisePool
     .withPriority()
     .withConcurrency(2)
     .withTasks(tasks);
 
 const p = PromisePool
-    .withTasks(tasks2)
+    .withTasks(tasks)
     .withConcurrency(2);
 
 console.time('p');
@@ -64,8 +62,8 @@ console.timeEnd('wp');
 console.time('pall');
 const limit = 2;
 const results2 = [];
-for (let i=0; i<tasks2.length; i+=limit) {
-    results2.push(...(await Promise.allSettled(tasks2
+for (let i=0; i<tasks.length; i+=limit) {
+    results2.push(...(await Promise.allSettled(tasks
         .slice(i, i + limit)
         .map(supplier => supplier.task()))));
 }
