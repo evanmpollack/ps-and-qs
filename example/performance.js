@@ -1,5 +1,4 @@
-import PromisePool from '../lib/pool/promisepool.js';
-import WeightedPromisePool from '../lib/weightedpool/weightedpromisepool.js';
+import PromisePool from '../lib/promisepool.js';
 
 const LIMIT = 100;
 const NUM_TASKS = 3000;
@@ -26,17 +25,17 @@ for (let i = 0; i < NUM_TASKS; i++) {
 
 // Pool strategy
 console.time('pool');
-const pool = new PromisePool(taskSuppliers, {
-    concurrencyLimit: LIMIT
+const pool = new PromisePool(weightedTaskSuppliers, {
+    concurrency: LIMIT
 });
 await pool.start();
 console.timeEnd('pool');
 
 // Weighted pool strategy
 console.time('weightedpool');
-const wPool = new WeightedPromisePool(weightedTaskSuppliers, {
-    concurrencyLimit: LIMIT,
-    comparator: (a, b) => b.priority - a.priority
+const wPool = new PromisePool(weightedTaskSuppliers, {
+    concurrency: LIMIT,
+    prioritized: true
 });
 await wPool.start();
 console.timeEnd('weightedpool');
