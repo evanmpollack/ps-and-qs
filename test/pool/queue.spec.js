@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import Queue from '../../lib/pool/queue.js';
+import EmptyCollectionError from '../../lib/error/emptycollectionerror.js';
 import { array } from '../helpers.js';
 
 /**
@@ -39,14 +40,11 @@ describe('Queue', function() {
     describe('#dequeue', function() {
         context('queue is empty', function() {
             it('should throw error', function() {
-                const expectedErrorType = 'Error';
-                const expectedMessage = 'Operation not allowed on queue of size 0';
+                const type = 'queue';
+                const expectedError = new EmptyCollectionError(type);
                 // This bound to instance method because instance reference 
                 // is not passed in with function reference
-                assert.throws(queue.dequeue.bind(queue), { 
-                    name: expectedErrorType,
-                    message: expectedMessage 
-                });
+                assert.throws(queue.dequeue.bind(queue), expectedError);
             });
         });
         

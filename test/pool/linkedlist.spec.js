@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import LinkedList from '../../lib/pool/linkedlist.js';
 import Node from '../../lib/pool/node.js';
+import EmptyCollectionError from '../../lib/error/emptycollectionerror.js';
 import { array } from '../helpers.js';
 
 /**
@@ -110,14 +111,11 @@ describe('LinkedList', function() {
         describe('#removeFirst', function() {
             context('when list is empty', function() {
                 it('should throw error', function() {
-                    const expectedErrorType = 'Error';
-                    const expectedMessage = 'Operation not allowed on list of size 0';
+                    const type = 'linked list';
+                    const expectedError = new EmptyCollectionError(type);
                     // This bound to instance method because instance reference 
                     // is not passed in with function reference
-                    assert.throws(linkedList.removeFirst.bind(linkedList), { 
-                        name: expectedErrorType,
-                        message: expectedMessage 
-                    });
+                    assert.throws(linkedList.removeFirst.bind(linkedList), expectedError);
                 });
             });
     
