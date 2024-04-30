@@ -40,8 +40,7 @@ describe('Queue', function() {
     describe('#dequeue', function() {
         context('queue is empty', function() {
             it('should throw error', function() {
-                const type = 'queue';
-                const expectedError = new EmptyCollectionError(type);
+                const expectedError = new EmptyCollectionError();
                 // This bound to instance method because instance reference 
                 // is not passed in with function reference
                 assert.throws(queue.dequeue.bind(queue), expectedError);

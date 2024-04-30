@@ -102,8 +102,7 @@ describe('LinkedList', function() {
         describe('#removeFirst', function() {
             context('when list is empty', function() {
                 it('should throw error', function() {
-                    const type = 'linked list';
-                    const expectedError = new EmptyCollectionError(type);
+                    const expectedError = new EmptyCollectionError();
                     // This bound to instance method because instance reference 
                     // is not passed in with function reference
                     assert.throws(linkedList.removeFirst.bind(linkedList), expectedError);
