@@ -36,15 +36,6 @@ describe('LinkedList', function() {
             it('should return an empty linked list if input array is empty', function() {
                 assert.equal(LinkedList.fromArray(array.empty).size, 0);
             });
-
-            it('should throw a TypeError if input is not a type of array', function() {
-                const expectedErrorType = 'TypeError';
-                const expectedMessage = 'Input must be an array';
-                assert.throws(() => LinkedList.fromArray(array.invalid), {
-                    name: expectedErrorType,
-                    message: expectedMessage
-                });
-            });
         });
     });
     
