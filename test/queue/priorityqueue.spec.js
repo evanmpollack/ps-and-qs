@@ -2,6 +2,32 @@ import assert from 'node:assert/strict';
 import PriorityQueue from '../../lib/queue/priorityqueue.js';
 import { array } from '../helpers.js';
 
+const maxComparator = (a, b) => b - a;
+
+// needed?
+const isHeap = (array, comparator) => {
+    let isHeap = true;
+    const lastIntenalIndex = Math.floor((array.length / 2)) - 1;
+    for (let i = lastIntenalIndex; i>=0; i--) {
+        // Find way to eliminate duplicate definitions
+        const leftChild = {
+            get index() { return (2 * i) + 1; },
+            get value() { return array[this.index]; }
+        };
+        const rightChild = {
+            get index() { return (2 * i) + 2; },
+            get value() { return array[this.index]; }
+        }
+        const violatesHeap = (leftChild.index < array.length && comparator(array[i], leftChild.value) > 0) ||
+            (rightChild.index > array.length && comparator(array[i], rightChild.value) > 0);
+        if (violatesHeap) {
+            isHeap = false;
+            break;
+        }
+    }
+    return isHeap;
+};
+
 describe('PriorityQueue', function() {
     context('creation', function() {
         describe('#fromArray', function() {
