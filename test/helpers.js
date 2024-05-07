@@ -31,3 +31,12 @@ export const queueToArray = (queue) => {
     while(!queue.empty) result.push(queue.dequeue());
     return result;
 };
+
+/**
+ * Helper method that populates a queue with the elements of a given array.
+ * Maintains order of array.
+ * 
+ * @param {Queue | PriorityQueue} queue
+ * @param {Array} array
+ */
+export const loadQueue = (queue, array) => array.forEach(v => queue.enqueue(v));
