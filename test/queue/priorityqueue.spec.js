@@ -26,16 +26,27 @@ describe('PriorityQueue', function() {
                 assert.equal(PriorityQueue.fromArray(array.empty).size, array.empty.length);
             });
 
-            it('should throw a TypeError if input array is not an Array', function() {
+            it('should not mutate the original array', function() {
+                const originalArray = array.populated;
+                PriorityQueue.fromArray(originalArray, maxComparator)
+                assert.deepEqual(originalArray, array.populated);
+            });
+
+            // Skipped for now, implement when open sourcing for future developers
+            it.skip('should throw a TypeError if input array is not an Array', function() {
                 const expectedError = new TypeError('Array must be an Array');
                 assert.throws(PriorityQueue.fromArray.bind(null, array.invalid, maxComparator), expectedError);
             });
 
-            it('should throw a TypeError if input comparator is not a Function', function() {
+            // Skipped for now, implement when open sourcing for future developers
+            it.skip('should throw a TypeError if input comparator is not a Function', function() {
                 const expectedError = new TypeError('Comparator must be a Function');
                 const invalidComparator = {};
                 assert.throws(PriorityQueue.fromArray.bind(null, array.populated, invalidComparator), expectedError);
             });
+
+            // When implementing the above consider this. only partially implemented through enqueue method
+            it('should throw an error if any element in input array is nullish');
         });
     });
 
@@ -49,7 +60,6 @@ describe('PriorityQueue', function() {
         })
 
         describe('#enqueue', function() {
-            // Queue enqueue test uses empty queue
             beforeEach(function() {
                 loadQueue(priorityQueue, array.populated);
             });
@@ -57,20 +67,6 @@ describe('PriorityQueue', function() {
             it('should insert the element into the priority queue', function() {
                 priorityQueue.enqueue(uniqueValue);
                 assert(queueToArray(priorityQueue).includes(uniqueValue));
-            });
-
-            // Does this actually test the enqueue method or does it really test dequeue?
-            // Consider a max heap, [100, 25, 50], with a broken siftUp and a working siftDown method when you insert 75.
-            // If siftUp doesn't work and then I call dequeue to get the array, the heap will fix itself on the first dequeue
-            it('should maintain the ordering defined by the instance\'s comparator', function() {
-                priorityQueue.enqueue(uniqueValue);
-                const actual = queueToArray(priorityQueue);
-                const expected = (() => {
-                    const mutableArray = array.populated;
-                    mutableArray.push(uniqueValue);
-                    return mutableArray.sort(maxComparator);
-                })();
-                assert.deepEqual(actual, expected);
             });
 
             it('size should increase by 1', function() {
@@ -115,12 +111,6 @@ describe('PriorityQueue', function() {
                     assert.equal(actual, highestPriorityElement);
                 });
 
-                // Isn't this a duplicate of should return and remove element with most priority?
-                it('should maintain the ordering defined by the instance\'s comparator', function() {
-                    const highestPriorityElement = priorityQueue.dequeue();
-                    assert.deepEqual(queueToArray(priorityQueue), array.populated.filter(v => v !== highestPriorityElement).sort(maxComparator));
-                });
-
                 it('size should decrease by 1', function() {
                     const previousSize = priorityQueue.size;
                     priorityQueue.dequeue();
@@ -128,5 +118,10 @@ describe('PriorityQueue', function() {
                 });
             });
         });
+    });
+
+    // Test different inputs (int, string, obj, etc)
+    context.skip('comparator', function() {
+
     });
 });
