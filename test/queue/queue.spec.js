@@ -1,36 +1,31 @@
 import assert from 'node:assert/strict';
-import Queue from '../../lib/pool/queue.js';
+import Queue from '../../lib/queue/queue.js';
 import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
-import { array } from '../helpers.js';
-
-/**
- * Helper method that populates a queue with numbers in ascending order in range [0, size).
- * Ordered for ease of testing.
- * @param {Queue} queue - Queue instance that needs to be populated
- * @param {Array} arr - Array to populate queue with 
- */
-const populateQueue = (queue, arr) => arr.forEach(i => queue.enqueue(i));
+import { array, queueToArray, loadQueue } from '../helpers.js';
 
 describe('Queue', function() { 
     context('creation', function() {
         describe('#fromArray', function() {
+            it('should return an instance of Queue', function() {
+                assert(Queue.fromArray(array.populated) instanceof Queue);
+            });
+
             it('should maintain the order of the input array', function() {
                 const queueFromArray = Queue.fromArray(array.populated);
-                const queueAsArray = (() => {
-                    const elements = [];
-                    while(!queueFromArray.empty) elements.push(queueFromArray.dequeue());
-                    return elements;
-                })();
+                const queueAsArray = queueToArray(queueFromArray);
                 assert.deepEqual(queueAsArray, array.populated);
             });
 
-            it('size should increase by the length of the input array', function() {
+            it('size should be equal to the size of the input array', function() {
                 assert.equal(Queue.fromArray(array.populated).size, array.populated.length);
             });
 
             it('should return an empty queue if input array is empty', function() {
                 assert.equal(Queue.fromArray(array.empty).size, 0);
             });
+
+            // Skipped for now, implement when open sourcing for future developers
+            it('should throw a TypeError if input array is not an Array');
         });
     });
 
@@ -43,7 +38,11 @@ describe('Queue', function() {
 
         // What about when list is empty?
         describe('#enqueue', function() {
-            it('should insert value at the end', function() {
+            beforeEach(function() {
+                loadQueue(queue, array.populated);
+            });
+
+            it('should insert element at the end', function() {
                 const expectedLastElement = 0;
                 queue.enqueue(expectedLastElement);
                 const lastElement = (() => {
@@ -63,7 +62,7 @@ describe('Queue', function() {
 
         describe('#dequeue', function() {
             context('queue is empty', function() {
-                it('should throw error', function() {
+                it('should throw an EmptyQueueError', function() {
                     const expectedError = new EmptyQueueError();
                     // This bound to instance method because instance reference 
                     // is not passed in with function reference
@@ -74,10 +73,16 @@ describe('Queue', function() {
             // What about when size is 1?
             context('queue is not empty', function() {
                 beforeEach(function() {
-                    populateQueue(queue, array.populated);
+                    loadQueue(queue, array.populated);
                 });
 
-                it('should return the value at the front', function() {
+                it('should remove the element at the front', function() {
+                    const firstElement = array.populated[0];
+                    queue.dequeue();
+                    assert(!queueToArray(queue).includes(firstElement));
+                });
+
+                it('should return the element at the front', function() {
                     const data = queue.dequeue();
                     assert.equal(data, array.populated[0]);
                 });

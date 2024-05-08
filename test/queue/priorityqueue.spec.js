@@ -13,6 +13,8 @@ describe('PriorityQueue', function() {
                 assert(PriorityQueue.fromArray(array.populated, maxComparator) instanceof PriorityQueue);
             });
 
+            // Does this really test ordering or is this an implicit dequeue test?
+            // I think a better test is if this call produces a valid heap
             it('should use the ordering defined by the given comparator', function() {
                 const pq = PriorityQueue.fromArray(array.populated, maxComparator);
                 assert.deepEqual(queueToArray(pq), array.populated.sort(maxComparator));
