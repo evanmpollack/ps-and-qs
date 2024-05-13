@@ -3,25 +3,24 @@ import PriorityQueue from '../../lib/queue/priorityqueue.js';
 import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
 import { array, queueToArray, loadQueue } from '../helpers.js';
 
-// Max integer comparator
-const maxComparator = (a, b) => b - a;
+const maxNumberComparator = (a, b) => b - a;
 
 describe('PriorityQueue', function() {
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of PriorityQueue', function() {
-                assert(PriorityQueue.fromArray(array.populated, maxComparator) instanceof PriorityQueue);
+                assert(PriorityQueue.fromArray(array.populated, maxNumberComparator) instanceof PriorityQueue);
             });
 
             // Does this really test ordering or is this an implicit dequeue test?
             // I think a better test is if this call produces a valid heap
             it('should use the ordering defined by the given comparator', function() {
-                const pq = PriorityQueue.fromArray(array.populated, maxComparator);
-                assert.deepEqual(queueToArray(pq), array.populated.sort(maxComparator));
+                const pq = PriorityQueue.fromArray(array.populated, maxNumberComparator);
+                assert.deepEqual(queueToArray(pq), array.populated.sort(maxNumberComparator));
             });
 
             it('size should be equal to the size of the input array', function() {
-                assert.equal(PriorityQueue.fromArray(array.populated, maxComparator).size, array.populated.length);
+                assert.equal(PriorityQueue.fromArray(array.populated, maxNumberComparator).size, array.populated.length);
             });
 
             it('should return an empty priority queue if input array is empty', function() {
@@ -30,14 +29,14 @@ describe('PriorityQueue', function() {
 
             it('should not mutate the original array', function() {
                 const originalArray = array.populated;
-                PriorityQueue.fromArray(originalArray, maxComparator)
+                PriorityQueue.fromArray(originalArray, maxNumberComparator)
                 assert.deepEqual(originalArray, array.populated);
             });
 
             // Skipped for now, implement when open sourcing for future developers
             it.skip('should throw a TypeError if input array is not an Array', function() {
                 const expectedError = new TypeError('Array must be an Array');
-                assert.throws(PriorityQueue.fromArray.bind(null, array.invalid, maxComparator), expectedError);
+                assert.throws(PriorityQueue.fromArray.bind(null, array.invalid, maxNumberComparator), expectedError);
             });
 
             // Skipped for now, implement when open sourcing for future developers
@@ -58,7 +57,7 @@ describe('PriorityQueue', function() {
         let priorityQueue;
 
         beforeEach(function() {
-            priorityQueue = new PriorityQueue(maxComparator);
+            priorityQueue = new PriorityQueue(maxNumberComparator);
         })
 
         describe('#enqueue', function() {
@@ -102,13 +101,13 @@ describe('PriorityQueue', function() {
                 });
 
                 it('should remove the element with the most priority', function() {
-                    const highestPriorityElement = array.populated.sort(maxComparator)[0];
+                    const highestPriorityElement = array.populated.sort(maxNumberComparator)[0];
                     priorityQueue.dequeue();
                     assert(!queueToArray(priorityQueue).includes(highestPriorityElement));
                 });
 
                 it('should return the element with the most priority', function() {
-                    const highestPriorityElement = array.populated.sort(maxComparator)[0];
+                    const highestPriorityElement = array.populated.sort(maxNumberComparator)[0];
                     const actual = priorityQueue.dequeue();
                     assert.equal(actual, highestPriorityElement);
                 });
