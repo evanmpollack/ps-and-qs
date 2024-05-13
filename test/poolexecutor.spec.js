@@ -18,40 +18,43 @@ import { array } from './helpers.js';
  */
 
 /**
- * Helper object consisting of all the possible task inputs needed for unit testing
+ * Helper object consisting of all the possible task inputs and expected outputs needed for unit testing
  */
 const task = {
-    resolves: () => new Promise((resolve) => resolve('resolved')),
-    rejects: () => new Promise((_, reject) => reject('rejected')),
-    error: () => new Promise(() => { throw new Error('error') }),
-    synchronous: () => 'result',
-    notFunction: 'value'
-};
-
-/**
- * Helper object consisting of all the possible task results needed for unit testing
- */
-const taskResult = {
-    resolved: {
-        status: 'fulfilled',
-        value: 'resolved'
+    resolves: {
+        input: () => new Promise((resolve) => resolve('resolved')),
+        output: {
+            status: 'fulfilled',
+            value: 'resolved'
+        }
     },
-    rejected: {
-        status: 'rejected',
-        reason: 'rejected'
+    rejects: {
+        input: () => new Promise((_, reject) => reject('rejected')),
+        output: {
+            status: 'rejected',
+            reason: 'rejected'
+        }
     },
     error: {
-        status: 'rejected',
-        reason: new Error('error')
+        input: () => new Promise(() => { throw new Error('error') }),
+        output: {
+            status: 'rejected',
+            reason: new Error('error')
+        }
     },
     synchronous: {
-        status: 'fulfilled',
-        value: 'result'
+        input: () => 'result',
+        output: {
+            status: 'fulfilled',
+            value: 'result'
+        }
     },
     notFunction: {
-        status: 'rejected',
-        // should be error that's thrown when you try to call a non-function
-        reason: 'value'()
+        input: 'value',
+        output: {
+            status: 'rejected',
+            reason: new TypeError('undefined is not a function')
+        }
     }
 };
 
@@ -69,8 +72,9 @@ const load = (num, task) => {
 }
 
 const concurrency = 2;
+const taskCount = 5;
 
-describe('PoolExecutor', function() {
+describe.only('PoolExecutor', function() {
     describe('#start', function() {
         it('should return an empty array if the task queue is empty', async function() {
             const executor = new PoolExecutor(Queue.fromArray(array.empty), concurrency);
@@ -79,44 +83,44 @@ describe('PoolExecutor', function() {
         });
 
         it('should return an array of results given tasks that resolve', async function() {
-            const executor = new PoolExecutor(Queue.fromArray(load(5, task.resolves)), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray(load(taskCount, task.resolves.input)), concurrency);
             const result = await executor.start();
-            const expected = Array.from({ length: 5 }, () => taskResult.resolved);
+            const expected = Array.from({ length: taskCount }, () => task.resolves.output);
             assert.deepEqual(result, expected);
         });
 
         it('should return an array of results given tasks that reject', async function() {
-            const executor = new PoolExecutor(Queue.fromArray(load(5, task.rejects)), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray(load(taskCount, task.rejects.input)), concurrency);
             const result = await executor.start();
-            const expected = Array.from({ length: 5 }, () => taskResult.rejected);
+            const expected = Array.from({ length: taskCount }, () => task.rejects.output);
             assert.deepEqual(result, expected);
         });
 
         it('should return an array of results given tasks that error', async function() {
-            const executor = new PoolExecutor(Queue.fromArray(load(5, task.error)), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray(load(taskCount, task.error.input)), concurrency);
             const result = await executor.start();
-            const expected = Array.from({ length: 5 }, () => taskResult.error);
+            const expected = Array.from({ length: taskCount }, () => task.error.output);
             assert.deepEqual(result, expected);
         });
 
         it('should return an array of results given tasks that are synchronous', async function() {
-            const executor = new PoolExecutor(Queue.fromArray(load(5, task.synchronous)), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray(load(taskCount, task.synchronous.input)), concurrency);
             const result = await executor.start();
-            const expected = Array.from({ length: 5 }, () => taskResult.synchronous);
+            const expected = Array.from({ length: taskCount }, () => task.synchronous.output);
             assert.deepEqual(result, expected);
         });
 
         it('should return an array of results given tasks that aren\'t functions', async function() {
-            const executor = new PoolExecutor(Queue.fromArray(load(5, task.notFunction)), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray(load(taskCount, task.notFunction.input)), concurrency);
             const result = await executor.start();
-            const expected = Array.from({ length: 5 }, () => taskResult.notFunction);
+            const expected = Array.from({ length: taskCount }, () => task.notFunction.output);
             assert.deepEqual(result, expected);
         });
 
         // -----
 
         it('result array should be the same length as the input task queue', async function() {
-            const queue = Queue.fromArray(load(5, task.resolves));
+            const queue = Queue.fromArray(load(taskCount, task.resolves));
             const executor = new PoolExecutor(queue, concurrency);
             const length = (await executor.start()).length;
             assert.equal(length, queue.size);
@@ -124,15 +128,15 @@ describe('PoolExecutor', function() {
 
         // -----
 
-        // Is this what I'm trying to achieve?
+        // ensures both queue types have the same interface
         it('should not reject when given a priority queue', async function() {
             const comparator = (a, b) => b.priority - a.priority;
-            const executor = new PoolExecutor(PriorityQueue.fromArray(load(5, task.resolves)), comparator);
+            const executor = new PoolExecutor(PriorityQueue.fromArray(load(taskCount, task.resolves)), comparator);
             assert.doesNotReject(executor.start.bind(executor));
         });
 
         it('should not reject if concurrency greater than the number of tasks', async function() {
-            const executor = new PoolExecutor(Queue.fromArray([task.resolves]), concurrency);
+            const executor = new PoolExecutor(Queue.fromArray([task.resolves.input]), concurrency);
             assert.doesNotReject(executor.start.bind(executor));
         });
     });
