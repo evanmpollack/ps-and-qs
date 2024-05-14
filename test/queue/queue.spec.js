@@ -36,7 +36,7 @@ describe('Queue', function() {
             queue = new Queue();
         });
 
-        // What about when list is empty?
+        // Parameterize
         describe('#enqueue', function() {
             beforeEach(function() {
                 loadQueue(queue, array.populated);
@@ -70,7 +70,7 @@ describe('Queue', function() {
                 });
             });
             
-            // What about when size is 1?
+            // Parameterize
             context('queue is not empty', function() {
                 beforeEach(function() {
                     loadQueue(queue, array.populated);

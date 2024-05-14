@@ -12,8 +12,7 @@ describe('PriorityQueue', function() {
                 assert(PriorityQueue.fromArray(array.populated, maxNumberComparator) instanceof PriorityQueue);
             });
 
-            // Does this really test ordering or is this an implicit dequeue test?
-            // I think a better test is if this call produces a valid heap
+            // Move to comparator context
             it('should use the ordering defined by the given comparator', function() {
                 const pq = PriorityQueue.fromArray(array.populated, maxNumberComparator);
                 assert.deepEqual(queueToArray(pq), array.populated.sort(maxNumberComparator));
@@ -60,6 +59,7 @@ describe('PriorityQueue', function() {
             priorityQueue = new PriorityQueue(maxNumberComparator);
         })
 
+        // Parameterize
         describe('#enqueue', function() {
             beforeEach(function() {
                 loadQueue(priorityQueue, array.populated);
@@ -86,7 +86,7 @@ describe('PriorityQueue', function() {
                 assert.throws(priorityQueue.enqueue.bind(priorityQueue, undefined), expectedError);
             });
         });
-    
+
         describe('#dequeue', function() {
             context('priority queue is empty', function() {
                 it('should throw an EmptyQueueError', function() {
@@ -95,6 +95,7 @@ describe('PriorityQueue', function() {
                 });
             });
 
+            // Parameterize
             context('priority queue is not empty', function() {
                 beforeEach(function() {
                     loadQueue(priorityQueue, array.populated);
@@ -121,8 +122,9 @@ describe('PriorityQueue', function() {
         });
     });
 
-    // Test different inputs (int, string, obj, etc)
-    context.skip('comparator', function() {
-
+    context('comparator', function() {
+        it('should order correctly given a number comparator');
+        it('should order correctly given a string comparator');
+        it('should order correctly given an object comparator');
     });
 });
