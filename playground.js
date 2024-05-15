@@ -1,55 +1,71 @@
-import LinkedList from "./lib/pool/linkedlist.js";
-import Queue from "./lib/pool/queue.js";
-import PromisePool from "./lib/pool/promisepool.js";
+import PromisePool from './lib/promisepool.js';
 
-const ll = new LinkedList();
-const q = new Queue();
-const task = () => new Promise((_, reject) => { 
-    setTimeout(() => { throw 'hello' }, 0);
-    console.log('hi1')
-    // throw new Error('from error');
-});
-const pp = new PromisePool([task], {
-    concurrencyLimit: 1
-});
-console.log('hi2');
+const task = (priority) => new Promise((resolve) => setTimeout(() => resolve(priority), 1000));
 
-// try {
-//     const v = await task();
-//     console.log('Try: ' + v);
-// } catch(e) {
-//     console.log('Catch: ' + e);
-// }
+const tasks = [
+    {
+        priority: 2,
+        task: task
+    }, 
+    {
+        priority: 1,
+        task: task
+    },
+    {
+        priority: 5,
+        task: task
+    },
+    {
+        priority: 72,
+        task: task
+    }, 
+    {
+        priority: 1,
+        task: task
+    },
+    {
+        priority: 27,
+        task: task
+    },
+    {
+        priority: 55,
+        task: task
+    }, 
+    {
+        priority: 6,
+        task: task
+    },
+    {
+        priority: 7,
+        task: task
+    }
+];
 
-// try {
-//     ll.removeFirst();
-// } catch (e) {
-//     console.error(e.message);
-// }
+const wp = PromisePool
+    .withPriority()
+    .withConcurrency(2)
+    .withTasks(tasks);
 
-// ll.insertLast(1);
-// ll.insertLast(2);
-// ll.insertLast(5);
+const p = PromisePool
+    .withTasks(tasks)
+    .withConcurrency(2);
 
-// console.log(ll.toString());
+console.time('p');
+console.log(await p.start());
+console.timeEnd('p');
 
-// ll.removeFirst();
-// ll.removeFirst();
-// ll.removeFirst();
+console.time('wp');
+const results = await wp.start();
+console.log(results);
+console.timeEnd('wp');
 
-// q.enqueue(1);
-// q.enqueue(10);
-// q.enqueue(100);
-
-// console.log(q);
-
-// q.dequeue();
-// q.dequeue();
-// q.dequeue();
-
-// console.log(q);
-
-// q.dequeue();
-
-
-// console.log(new PromisePool());
+console.time('pall');
+const limit = 2;
+const results2 = [];
+for (let i=0; i<tasks.length; i+=limit) {
+    results2.push(...(await Promise.allSettled(tasks
+        .slice(i, i + limit)
+        .map(supplier => supplier.task()))));
+}
+console.log(results2);
+console.timeEnd('pall');

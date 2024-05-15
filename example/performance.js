@@ -1,8 +1,9 @@
-import PromisePool from "../lib/pool/promisepool.js";
+import PromisePool from '../lib/promisepool.js';
 
 const LIMIT = 100;
 const NUM_TASKS = 3000;
 const taskSuppliers = [];
+const weightedTaskSuppliers = [];
 
 // Test task that can take between 500 and 1500ms to resolve
 const task = (id) => new Promise((resolve) => {
@@ -16,15 +17,28 @@ const task = (id) => new Promise((resolve) => {
 // Create promise suppliers
 for (let i = 0; i < NUM_TASKS; i++) {
     taskSuppliers.push(() => task(i));
+    weightedTaskSuppliers.push({
+        priority: i,
+        task: () => task(i)
+    });
 }
 
 // Pool strategy
 console.time('pool');
-const pool = new PromisePool(taskSuppliers, {
-    concurrencyLimit: LIMIT
+const pool = new PromisePool(weightedTaskSuppliers, {
+    concurrency: LIMIT
 });
 await pool.start();
 console.timeEnd('pool');
+
+// Weighted pool strategy
+console.time('weightedpool');
+const wPool = new PromisePool(weightedTaskSuppliers, {
+    concurrency: LIMIT,
+    prioritized: true
+});
+await wPool.start();
+console.timeEnd('weightedpool');
 
 // Batching with Promise.all
 console.time('all');
