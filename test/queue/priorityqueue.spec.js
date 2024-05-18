@@ -126,7 +126,7 @@ describe.only('PriorityQueue', function() {
         // how to combine with version in fromArray
         it('should order correctly given a number comparator');
         it('should order correctly given a string comparator', function() {
-            const words = [
+            const string = [
                 'cheese',
                 'two',
                 'fifteen',
@@ -144,10 +144,37 @@ describe.only('PriorityQueue', function() {
                     return charCode1 - charCode2;
                 }
             }
-            const pq = PriorityQueue.fromArray(words, fourthLetterComparator);
-            const expected = Array.from(words).sort(fourthLetterComparator);
+            const pq = PriorityQueue.fromArray(string, fourthLetterComparator);
+            const expected = string.sort(fourthLetterComparator);
             assert.deepEqual(queueToArray(pq), expected);
         });
-        it('should order correctly given an object comparator');
+        it('should order correctly given an object comparator', function() {
+            const objects = [
+                {
+                    priority: 500,
+                    task: () => {}
+                },
+                {
+                    priority: -2,
+                    task: () => {}
+                },
+                {
+                    priority: 10,
+                    task: () => {}
+                },
+                {
+                    priority: 20,
+                    task: () => {}
+                },
+                {
+                    priority: 250,
+                    task: () => {}
+                }
+            ];
+            const objectComparator = (a, b) => a.priority - b.priority;
+            const pq = PriorityQueue.fromArray(objects, objectComparator);
+            const expected = objects.sort(objectComparator);
+            assert.deepEqual(queueToArray(pq), expected);
+        });
     });
 });
