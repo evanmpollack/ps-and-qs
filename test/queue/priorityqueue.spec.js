@@ -5,7 +5,7 @@ import { array, queueToArray, loadQueue } from '../helpers.js';
 
 const maxNumberComparator = (a, b) => b - a;
 
-describe('PriorityQueue', function() {
+describe.only('PriorityQueue', function() {
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of PriorityQueue', function() {
@@ -123,8 +123,31 @@ describe('PriorityQueue', function() {
     });
 
     context('comparator', function() {
+        // how to combine with version in fromArray
         it('should order correctly given a number comparator');
-        it('should order correctly given a string comparator');
+        it('should order correctly given a string comparator', function() {
+            const words = [
+                'cheese',
+                'two',
+                'fifteen',
+                'abba',
+                'sucker'
+            ];
+            const fourthLetterComparator = (s1, s2) => {
+                const charCode1 = s1.charCodeAt(3);
+                const charCode2 = s2.charCodeAt(3);
+                if (isNaN(charCode1) && !isNaN(charCode2)) {
+                    return 1;
+                } else if (!isNaN(charCode1) && isNaN(charCode2)) {
+                    return -1;
+                } else {
+                    return charCode1 - charCode2;
+                }
+            }
+            const pq = PriorityQueue.fromArray(words, fourthLetterComparator);
+            const expected = Array.from(words).sort(fourthLetterComparator);
+            assert.deepEqual(queueToArray(pq), expected);
+        });
         it('should order correctly given an object comparator');
     });
 });
