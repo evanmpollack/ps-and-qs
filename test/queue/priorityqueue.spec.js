@@ -5,17 +5,11 @@ import { array, queueToArray, loadQueue } from '../helpers.js';
 
 const maxNumberComparator = (a, b) => b - a;
 
-describe.only('PriorityQueue', function() {
+describe('PriorityQueue', function() {
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of PriorityQueue', function() {
                 assert(PriorityQueue.fromArray(array.populated, maxNumberComparator) instanceof PriorityQueue);
-            });
-
-            // Move to comparator context
-            it('should use the ordering defined by the given comparator', function() {
-                const pq = PriorityQueue.fromArray(array.populated, maxNumberComparator);
-                assert.deepEqual(queueToArray(pq), array.populated.sort(maxNumberComparator));
             });
 
             it('size should be equal to the size of the input array', function() {
@@ -123,10 +117,16 @@ describe.only('PriorityQueue', function() {
     });
 
     context('comparator', function() {
-        // how to combine with version in fromArray
-        it('should order correctly given a number comparator');
+        it('should order correctly given a number comparator', function() {
+            const numbers = array.populated;
+            const numberComparator = maxNumberComparator;
+            const pq = PriorityQueue.fromArray(numbers, numberComparator);
+            const expected = numbers.sort(numberComparator);
+            assert.deepEqual(queueToArray(pq), expected);
+        });
+
         it('should order correctly given a string comparator', function() {
-            const string = [
+            const strings = [
                 'cheese',
                 'two',
                 'fifteen',
@@ -144,10 +144,11 @@ describe.only('PriorityQueue', function() {
                     return charCode1 - charCode2;
                 }
             }
-            const pq = PriorityQueue.fromArray(string, fourthLetterComparator);
-            const expected = string.sort(fourthLetterComparator);
+            const pq = PriorityQueue.fromArray(strings, fourthLetterComparator);
+            const expected = strings.sort(fourthLetterComparator);
             assert.deepEqual(queueToArray(pq), expected);
         });
+
         it('should order correctly given an object comparator', function() {
             const objects = [
                 {
