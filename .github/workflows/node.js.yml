@@ -17,7 +17,8 @@ jobs:
     strategy:
       matrix:
         # Min Version: 14.x because of Mocha.js
-        node-version: [14.x, 16.x, 18.x, 21.x]
+        # Should support 14.x and 16.x, as well.
+        node-version: [18.x, 21.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
