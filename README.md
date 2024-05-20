@@ -9,7 +9,7 @@ This library is similar to other popular promise limiting solutions like [p-limi
 and [@supercharge/promise-pool](https://www.npmjs.com/package/@supercharge/promise-pool). It expands on those by adding support for tasks that should be executed based on priority rather than insertion order.
 
 ### Details
-Launches tasks until the concurrency limit is reached and then waits for the last one to complete before returning the results. The completion of one task starts the next task, ensuring that the concurrency limit is never exceeded.
+Launches tasks until the concurrency limit is reached and then waits for the last one to complete before returning the results. The completion of one task starts the next task in the queue, ensuring that the concurrency limit is never exceeded.
 
 - Configurable through a fluent interface, property accessors, or an options argument in the constructor.
 - Backed by queue and priority queue data structures.
@@ -112,4 +112,7 @@ Follows the output format of [Promise.allSettled()](https://developer.mozilla.or
 
 #### Priority Queue
 - Uses an array-based heap under implementation under the hood to ensure logarithmic time (`O(logn)`) insertion and deletion.
-- `fromArray()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array, allowing for a tighter bound than the top-down approach.
+- `fromArray()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array.
+
+### Supported Node.js Versions
+`structuredClone` is used, make sure you are using a version `>= 18`
