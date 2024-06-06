@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "c8 mocha --recursive",
+    "build": "rollup --config",
     "start": "node index.js",
     "playground": "node --trace-uncaught playground.js",
     "example": "node ./example/performance.js"
@@ -22,7 +23,9 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
     "c8": "^9.1.0",
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "rollup": "^4.18.0"
   }
 }
