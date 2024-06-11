@@ -116,4 +116,4 @@ _Note: While not tested, this library should be compatible with Node 14 and 16. 
 3. Runtime statistics
 
 ### Contributing and Feedback
-All constructive feedback is appreciated. Please submit an issue using the appropriate label (bug, enhancement, etc) and I will follow-up as soon as possible.
+All constructive feedback is appreciated. Please submit an issue and I will follow-up as soon as possible.
