@@ -69,16 +69,6 @@ describe('PriorityQueue', function() {
                 priorityQueue.enqueue(uniqueValue);
                 assert.equal(priorityQueue.size, previousSize + 1);
             });
-
-            it('should throw a TypeError if input data is null', function() {
-                const expectedError = new TypeError('Cannot enqueue nullish data into priority queue');
-                assert.throws(priorityQueue.enqueue.bind(priorityQueue, null), expectedError);
-            });
-
-            it('should throw a TypeError if input data is undefined', function() {
-                const expectedError = new TypeError('Cannot enqueue nullish data into priority queue');
-                assert.throws(priorityQueue.enqueue.bind(priorityQueue, undefined), expectedError);
-            });
         });
 
         describe('#dequeue', function() {

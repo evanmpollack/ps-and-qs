@@ -61,7 +61,7 @@ const createArrayFromOneElement = (count, element) => Array.from({ length: count
 const concurrency = 2;
 const taskCount = 5;
 
-describe.only('PoolExecutor', function() {
+describe('PoolExecutor', function() {
     describe('#start', function() {
         // Takes in a singular input and expected output, copies them count times, and then executes the collection
 
