@@ -89,19 +89,19 @@ const results = await pool.start();
     - _Optional: only required when using the default comparator_
 
 #### Errors
-A `PromisePoolError` is thrown when the pool isn't configured correctly based on the requirements outlined in [Pool Properties](#pool-properties). The pool will do its best to handle task runtime errors internally by rejecting the task and providing a reason and will not halt execution. Tasks will reject if the `task` property is not found on an item or if the `task` property is not a function, as it cannot be invoked.
+A `PromisePoolError` is thrown when the pool isn't configured correctly based on the requirements outlined in [Pool Properties](#pool-properties). The pool will do its best to handle task runtime errors internally by rejecting the task and providing a reason. It will not halt execution. Tasks will reject if the `task` property is not found on an item. If the `task` property is found but is not a function, the value provided will be wrapped in a `Promise` that will resolve to the original value upon execution.
 
 #### Result Format
 Leverages [Promise.allSettled()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled) under the hood to generate the results, yielding the same result format.
 
 ### Data Structure Implementation Details
 #### Queue
-- Uses a singly linked list implementation under the hood to ensure constant time (`O(1)`) insertion and deletion.
+- Uses a singly linked list implementation under the hood to ensure constant time (`O(1)`) enqueue and dequeue.
 <!-- fromIterable -->
 - `fromArray()` runs in linear time (`O(n)`), as each element of the array has to be visited and inserted into the queue.
 
 #### Priority Queue
-- Uses an array-based heap implementation under the hood to ensure logarithmic time (`O(log(n))`) insertion and deletion.
+- Uses an array-based heap implementation under the hood to ensure logarithmic time (`O(log(n))`) enqueue and dequeue.
 <!-- fromIterable -->
 - `fromArray()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array.
 
@@ -111,9 +111,10 @@ Developed using Node 21 and tested against Node 18, 20, and 22, the current and 
 _Note: While not tested, this library should be compatible with Node 14 and 16. The library uses ES6 features that have been officially supported since Node 13, including ESM, async/await, and classes._
 
 ### Planned Enhancements
-1. Task timeout
-2. Task started and finished callbacks
-3. Runtime statistics
+1. Allow input iterables instead of just `Array`
+2. Task timeout
+3. Task started and finished callbacks
+4. Runtime statistics
 
 ### Contributing and Feedback
 All constructive feedback is appreciated. Please submit an issue and I will follow-up as soon as possible.
