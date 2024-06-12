@@ -3,6 +3,7 @@ import util from 'node:util';
 import PoolExecutor from '../lib/poolexecutor.js';
 import Queue from '../lib/queue/queue.js';
 import PriorityQueue from '../lib/queue/priorityqueue.js';
+import EmptyQueueError from '../lib/error/emptyqueueerror.js';
 import { array } from './helpers.js';
 
 /**
@@ -14,13 +15,18 @@ const status = {
 };
 
 /**
+ * Concurrency limit used throughout this test suite.
+ */
+const concurrency = 2;
+
+/**
  * Helper method that creates a task object from any input
  * Note: Task should be `Function`, but it is `any` to allow
  * for use in negative tests.
  * 
  * @param {any} task
  * @param {Number} priority 
- * @returns {Object} - a task object
+ * @returns {Object} a task object
  */
 const createTaskObject = (task, priority=0) => {
     return { task, priority };
@@ -29,9 +35,9 @@ const createTaskObject = (task, priority=0) => {
 /**
  * Helper method that creates a task result object. 
  * 
- * @param {String} message - reason or value
- * @param {Boolean} error - flag to determine if status should be fulfilled or rejected
- * @returns {Object} - task result
+ * @param {String} message reason or value
+ * @param {Boolean} error flag to determine if status should be fulfilled or rejected
+ * @returns {PromiseSettledResult} task result
  */
 const createTaskResult = (message, error=false) => {
     let result;
@@ -50,147 +56,119 @@ const createTaskResult = (message, error=false) => {
 }
 
 /**
- * Helper method that populates an array with the same element n times.
- * Note: Similar to [element] * length in Python.
+ * Executes an array of tasks using PoolExecutor. 
+ * If priority flag is true, a comparator must be provided.
  * 
- * @param {Number} num - number of tasks to insert
- * @param {Function} task - type of task to insert
+ * @param {Array} array task array
+ * @param {Boolean} priority flag to determine what type of queue to use
+ * @param {Function} comparator ordering function to be used if priority is true
+ * @returns {Promise<Object[]>} task results
  */
-const createArrayFromOneElement = (count, element) => Array.from({ length: count }, () => element);
-
-const concurrency = 2;
-const taskCount = 5;
+const execute = async (array, priority=false, comparator=undefined) => {
+    const queue = (priority) ? PriorityQueue.fromArray(array, comparator) : Queue.fromArray(array);
+    const executor = new PoolExecutor(queue, concurrency);
+    return await executor.start();
+};
 
 describe('PoolExecutor', function() {
-    describe('#start', function() {
-        // Takes in a singular input and expected output, copies them count times, and then executes the collection
-
-
-        // Needs to be cleaned up, is this even still needed?
-        const execute = async ({ input, output }, count) => {
-            const array = Array.isArray(input) ? input : createArrayFromOneElement(count, input);
-            const queue = Queue.fromArray(array);
-            const executor = new PoolExecutor(queue, concurrency);
-            const result = await executor.start();
-            const expected = Array.isArray(output) ? output : createArrayFromOneElement(count, output);
-            return { result, expected };
-        };
-        
+    describe('#start', function() {   
         // Should never reject
         context('pool promise', function() {
             it('should resolve to an empty array if the task queue is empty', async function() {
-                const input = array.empty;
-                const output = array.empty;
-                const { result, expected } = await execute({ input, output }, taskCount);
-                assert.deepEqual(result, expected);
+                const tasks = array.empty;
+                const result = await execute(tasks)
+                assert.deepEqual(result, tasks);
             });
 
-            // Asserts that all queues are treated the same by the executor
-            it ('should resolve when given a priority queue instead of a FIFO queue', async function() {
-                const minTaskComparator = (a, b) => a.priority - b.priority;
-                const task = createTaskObject(() => 'task', Math.floor(Math.random() * 100));
-                const tasks = createArrayFromOneElement(taskCount, task);
-                const queue = PriorityQueue.fromArray(tasks, minTaskComparator);
-                const executor = new PoolExecutor(queue, concurrency);
-                assert.doesNotReject(executor.start.bind(executor));
-            });
-
-            // Asserts that an EmptyQueueError won't be thrown
-            it('should resolve if concurrency limit is greater than the number of tasks', async function() {
-                const task = createTaskObject(() => 'task');
-                const queue = Queue.fromArray([task]);
-                const executor = new PoolExecutor(queue, concurrency);
-                assert.doesNotReject(executor.start.bind(executor));
+            it('should not reject with an EmptyQueueError when concurrency limit is greater than the number of tasks', async function() {
+                // concurrency = 2
+                const tasks = [createTaskObject(() => 'task')];
+                // doesNotReject needs to be awaited otherwise the test will end before the test promise can settle
+                // Note: If an error of any other type occurs, this test will fail with the error thrown, not an assertion error
+                await assert.doesNotReject(execute.bind(null, tasks), EmptyQueueError);
             });
 
             it('should resolve when all tasks are finished executing', async function() {
-                const value = 'resolved';
-                const input = createTaskObject(() => Promise.resolve(value));
-                const output = createTaskResult(value);
-                const { result } = await execute({ input, output }, taskCount);
-                assert.equal(result.length, taskCount);
+                const count = 5;
+                const tasks = Array.from({ length: count }, () => {
+                    return createTaskObject(() => Promise.resolve());
+                });
+                const result = await execute(tasks);
+                assert.equal(result.length, count);
             });
-
-            // Is this redundant given task promise context?
-            it('should resolve given both successful and unsuccessful tasks');
         });
 
         context('task promise', function() {
             it('should resolve given a task object with a task property that resolves', async function() {
                 const value = 'resolved';
-                const input = createTaskObject(() => new Promise((resolve) => resolve(value)));
-                const output = createTaskResult(value);
-                const { result, expected } = await execute({ input, output }, 1);
+                const task = createTaskObject(() => Promise.resolve(value));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
                 assert.deepEqual(result, expected);
             });
 
             it('should resolve given a task object with a task property that\'s synchronous', async function() {
                 const value = 'synchronous';
-                const input = createTaskObject(() => value);
-                const output = createTaskResult(value);
-                const { result, expected } = await execute({ input, output }, 1);
+                const task = createTaskObject(() => value);
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
                 assert.deepEqual(result, expected);
             });
 
-            // Is this what I want? Should it resolve instead?
-            // Pros: encourages wrapped functions
-            // Cons: doesn't follow promise.allSettled spec
             it('should resolve given a task object with a task property that isn\'t a function', async function() {
                 const value = 'value';
-                const input = createTaskObject(value);
-                const output = createTaskResult(value);
-                const { result, expected } = await execute({ input, output }, 1);
+                const task = createTaskObject(value);
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
                 assert.deepEqual(result, expected);
             });
     
             it('should reject given a task object with a task property that rejects', async function() {
                 const reason = 'rejected';
-                const input = createTaskObject(() => new Promise((_, reject) => reject(reason)));
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+                const task = createTaskObject(() => Promise.reject(reason));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
 
             it('should reject given a task object with a task property that asynchronously errors', async function() {
                 const reason = new Error('error');
-                const input = createTaskObject(() => new Promise(() => { throw reason }));
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+                const task = createTaskObject(() => new Promise(() => { throw reason; }));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
 
-            // Will not work right now, as synchronous errors are not handled
-            it.skip('should reject given a task object with a task property that synchronously errors', async function() {
-                const reason = 'error';
-                const input = createTaskObject(() => { throw new Error(reason); });
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+            it('should reject given a task object with a task property that synchronously errors', async function() {
+                const reason = new Error('error');
+                const task = createTaskObject(() => { throw reason; });
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
 
             it('should reject given a task object without a task property', async function() {
-                const input = { notATask: null, tesk: undefined, priority: 72 };
-                const reason = `Cannot find task property in ${util.inspect(input)}`;
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+                const invalidTaskObject = { notATask: null, tesk: undefined, priority: 72 };
+                const reason = `Cannot find task property in ${util.inspect(invalidTaskObject)}`;
+                const [ result ] = await execute([invalidTaskObject]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
 
-
-            // Check against types using forEach?
+            // Test against all types?
             it('should reject given a null task object', async function() {
-                const input = null;
-                const reason = `Cannot find task property in ${util.inspect(input)}`;
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+                const nullTaskObject = null;
+                const reason = `Cannot find task property in ${util.inspect(nullTaskObject)}`;
+                const [ result ] = await execute([nullTaskObject]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
 
             it('should reject given an undefined task object', async function() {
-                const input = undefined;
-                const reason = `Cannot find task property in ${util.inspect(input)}`;
-                const output = createTaskResult(reason, true);
-                const { result, expected } = await execute({ input, output }, 1);
+                const undefinedTaskObject = undefined;
+                const reason = `Cannot find task property in ${util.inspect(undefinedTaskObject)}`;
+                const [ result ] = await execute([undefinedTaskObject]);
+                const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
             });
         });
