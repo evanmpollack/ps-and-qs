@@ -1,139 +1,175 @@
 import assert from 'node:assert/strict';
+import util from 'node:util';
 import PoolExecutor from '../lib/poolexecutor.js';
 import Queue from '../lib/queue/queue.js';
 import PriorityQueue from '../lib/queue/priorityqueue.js';
+import EmptyQueueError from '../lib/error/emptyqueueerror.js';
 import { array } from './helpers.js';
 
-const createTask = (task, priority=0) => {
-    return { task, priority }
+/**
+ * Helper object that contains all of the task statuses needed for unit testing.
+ */
+const status = {
+    fulfilled: 'fulfilled',
+    rejected: 'rejected'
 };
 
 /**
- * Helper object consisting of all the possible task inputs and expected outputs needed for unit testing
+ * Concurrency limit used throughout this test suite.
  */
-const task = {
-    empty: {
-        input: array.empty,
-        output: array.empty
-    },
-    resolves: {
-        input: createTask(() => new Promise((resolve) => resolve('resolved'))),
-        output: {
-            status: 'fulfilled',
-            value: 'resolved'
-        }
-    },
-    rejects: {
-        input: createTask(() => new Promise((_, reject) => reject('rejected'))),
-        output: {
-            status: 'rejected',
-            reason: 'rejected'
-        }
-    },
-    error: {
-        input: createTask(() => new Promise(() => { throw new Error('error') })),
-        output: {
-            status: 'rejected',
-            reason: new Error('error')
-        }
-    },
-    synchronous: {
-        input: createTask(() => 'result'),
-        output: {
-            status: 'fulfilled',
-            value: 'result'
-        }
-    },
-    notFunction: {
-        input: createTask('value'),
-        output: {
-            status: 'rejected',
-            reason: new TypeError('undefined is not a function')
-        }
-    }
-};
-
-/**
- * Helper method that populates an array with the same element n times
- * Note: Similar to [element] * length in Python
- * 
- * @param {Number} num - number of tasks to insert
- * @param {Function} task - type of task to insert
- */
-const createArrayFromOneElement = (count, element) => Array.from({ length: count }, () => element);
-
 const concurrency = 2;
-const taskCount = 5;
+
+/**
+ * Helper method that creates a task object from any input
+ * Note: Task should be `Function`, but it is `any` to allow
+ * for use in negative tests.
+ * 
+ * @param {any} task
+ * @param {Number} priority 
+ * @returns {Object} a task object
+ */
+const createTaskObject = (task, priority=0) => {
+    return { task, priority };
+};
+
+/**
+ * Helper method that creates a task result object. 
+ * 
+ * @param {String} message reason or value
+ * @param {Boolean} error flag to determine if status should be fulfilled or rejected
+ * @returns {PromiseSettledResult} task result
+ */
+const createTaskResult = (message, error=false) => {
+    let result;
+    if (error) {
+        result = {
+            status: status.rejected,
+            reason: message
+        };
+    } else {
+        result = {
+            status: status.fulfilled,
+            value: message
+        };
+    }
+    return result;
+}
+
+/**
+ * Executes an array of tasks using PoolExecutor. 
+ * If priority flag is true, a comparator must be provided.
+ * 
+ * @param {Array} array task array
+ * @param {Boolean} priority flag to determine what type of queue to use
+ * @param {Function} comparator ordering function to be used if priority is true
+ * @returns {Promise<Object[]>} task results
+ */
+const execute = async (array, priority=false, comparator=undefined) => {
+    const queue = (priority) ? PriorityQueue.fromArray(array, comparator) : Queue.fromArray(array);
+    const executor = new PoolExecutor(queue, concurrency);
+    return await executor.start();
+};
 
 describe('PoolExecutor', function() {
-    describe('#start', function() {
-        context('resolve', function() {
-            const execute = async ({ input, output }, count) => {
-                const array = Array.isArray(input) ? input : createArrayFromOneElement(count, input);
-                const queue = Queue.fromArray(array);
-                const executor = new PoolExecutor(queue, concurrency);
-                const result = await executor.start();
-                const expected = Array.isArray(output) ? output : createArrayFromOneElement(count, output);
-                return { result, expected };
-            };
-    
-            it('should return an empty array if the task queue is empty', async function() {
-                const { result, expected } = await execute(task.resolves, taskCount);
-                assert.deepEqual(result, expected);
-            });
-    
-            it('should return an array of results given tasks that resolve', async function() {
-                const { result, expected } = await execute(task.rejects, taskCount);
-                assert.deepEqual(result, expected);
-            });
-    
-            it('should return an array of results given tasks that reject', async function() {
-                const { result, expected } = await execute(task.rejects, taskCount);
-                assert.deepEqual(result, expected);
-            });
-    
-            it('should return an array of results given tasks that error', async function() {
-                const { result, expected } = await execute(task.error, taskCount);
-                assert.deepEqual(result, expected);
-            });
-    
-            it('should return an array of results given tasks that are synchronous', async function() {
-                const { result, expected } = await execute(task.synchronous, taskCount);
-                assert.deepEqual(result, expected);
-            });
-    
-            // Skipped until fix to make this work is implemented
-            it.skip('should return an array of results given tasks that aren\'t functions', async function() {
-                const { result, expected } = await execute(task.notFunction, taskCount);
-                assert.deepEqual(result, expected);
+    describe('#start', function() {   
+        // Should never reject
+        context('pool promise', function() {
+            it('should resolve to an empty array if the task queue is empty', async function() {
+                const tasks = array.empty;
+                const result = await execute(tasks)
+                assert.deepEqual(result, tasks);
             });
 
-            it('should return an array of results given tasks that aren\'t in the correct format');
-    
-            it('result array should be the same length as the input task queue', async function() {
-                const { result } = await execute(task.resolves, taskCount);
-                assert.equal(result.length, taskCount);
+            it('should not reject with an EmptyQueueError when concurrency limit is greater than the number of tasks', async function() {
+                // concurrency = 2
+                const tasks = [createTaskObject(() => 'task')];
+                // doesNotReject needs to be awaited otherwise the test will end before the test promise can settle
+                // Note: If an error of any other type occurs, this test will fail with the error thrown, not an assertion error
+                await assert.doesNotReject(execute.bind(null, tasks), EmptyQueueError);
+            });
+
+            it('should resolve when all tasks are finished executing', async function() {
+                const count = 5;
+                const tasks = Array.from({ length: count }, () => {
+                    return createTaskObject(() => Promise.resolve());
+                });
+                const result = await execute(tasks);
+                assert.equal(result.length, count);
             });
         });
-        
-        context.skip('reject', function() {
-            const tasks = [task.resolves.input];
-            
-            // Assert.doesNotReject Does not work with my current implementation!!!!
-            
-            // ensures both queue types have the same interface
-            it('should not reject when given a priority queue', async function() {
-                // same as other tests, abstract
-                const maxTaskComparator = (a, b) => b.priority - a.priority;
-                const queue = PriorityQueue.fromArray(tasks, maxTaskComparator);
-                const executor = new PoolExecutor(queue, concurrency);
-                assert.doesNotReject(executor.start.bind(executor));
+
+        context('task promise', function() {
+            it('should resolve given a task object with a task property that resolves', async function() {
+                const value = 'resolved';
+                const task = createTaskObject(() => Promise.resolve(value));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
+                assert.deepEqual(result, expected);
             });
 
-            it('should not reject if concurrency greater than the number of tasks', async function() {
-                const queue = Queue.fromArray(tasks);
-                const executor = new PoolExecutor(queue, concurrency);
-                assert.doesNotReject(executor.start.bind(executor));
+            it('should resolve given a task object with a task property that\'s synchronous', async function() {
+                const value = 'synchronous';
+                const task = createTaskObject(() => value);
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
+                assert.deepEqual(result, expected);
+            });
+
+            it('should resolve given a task object with a task property that isn\'t a function', async function() {
+                const value = 'value';
+                const task = createTaskObject(value);
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(value);
+                assert.deepEqual(result, expected);
+            });
+    
+            it('should reject given a task object with a task property that rejects', async function() {
+                const reason = 'rejected';
+                const task = createTaskObject(() => Promise.reject(reason));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
+            });
+
+            it('should reject given a task object with a task property that asynchronously errors', async function() {
+                const reason = new Error('error');
+                const task = createTaskObject(() => new Promise(() => { throw reason; }));
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
+            });
+
+            it('should reject given a task object with a task property that synchronously errors', async function() {
+                const reason = new Error('error');
+                const task = createTaskObject(() => { throw reason; });
+                const [ result ] = await execute([task]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
+            });
+
+            it('should reject given a task object without a task property', async function() {
+                const invalidTaskObject = { notATask: null, tesk: undefined, priority: 72 };
+                const reason = `Cannot find task property in ${util.inspect(invalidTaskObject)}`;
+                const [ result ] = await execute([invalidTaskObject]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
+            });
+
+            // Test against all types?
+            it('should reject given a null task object', async function() {
+                const nullTaskObject = null;
+                const reason = `Cannot find task property in ${util.inspect(nullTaskObject)}`;
+                const [ result ] = await execute([nullTaskObject]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
+            });
+
+            it('should reject given an undefined task object', async function() {
+                const undefinedTaskObject = undefined;
+                const reason = `Cannot find task property in ${util.inspect(undefinedTaskObject)}`;
+                const [ result ] = await execute([undefinedTaskObject]);
+                const expected = createTaskResult(reason, true);
+                assert.deepEqual(result, expected);
             });
         });
     });

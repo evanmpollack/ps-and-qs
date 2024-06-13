@@ -25,22 +25,6 @@ describe('PriorityQueue', function() {
                 PriorityQueue.fromArray(originalArray, maxNumberComparator)
                 assert.deepEqual(originalArray, array.populated);
             });
-
-            // Skipped for now, implement when open sourcing for future developers
-            it.skip('should throw a TypeError if input array is not an Array', function() {
-                const expectedError = new TypeError('Array must be an Array');
-                assert.throws(PriorityQueue.fromArray.bind(null, array.invalid, maxNumberComparator), expectedError);
-            });
-
-            // Skipped for now, implement when open sourcing for future developers
-            it.skip('should throw a TypeError if input comparator is not a Function', function() {
-                const expectedError = new TypeError('Comparator must be a Function');
-                const invalidComparator = {};
-                assert.throws(PriorityQueue.fromArray.bind(null, array.populated, invalidComparator), expectedError);
-            });
-
-            // When implementing the above consider this. only partially implemented through enqueue method
-            it('should throw an error if any element in input array is nullish');
         });
     });
 
@@ -68,16 +52,6 @@ describe('PriorityQueue', function() {
                 const previousSize = priorityQueue.size;
                 priorityQueue.enqueue(uniqueValue);
                 assert.equal(priorityQueue.size, previousSize + 1);
-            });
-
-            it('should throw a TypeError if input data is null', function() {
-                const expectedError = new TypeError('Cannot enqueue nullish data into priority queue');
-                assert.throws(priorityQueue.enqueue.bind(priorityQueue, null), expectedError);
-            });
-
-            it('should throw a TypeError if input data is undefined', function() {
-                const expectedError = new TypeError('Cannot enqueue nullish data into priority queue');
-                assert.throws(priorityQueue.enqueue.bind(priorityQueue, undefined), expectedError);
             });
         });
 

@@ -1,7 +1,7 @@
 {
   "name": "ps-and-qs",
   "version": "1.0.0",
-  "description": "",
+  "description": "An efficient promise pool implementation that provides control over the concurrency limit and execution order when running a series of asynchronous tasks.",
   "main": "index.js",
   "scripts": {
     "test": "c8 mocha --recursive",
