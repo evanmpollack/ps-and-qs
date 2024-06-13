@@ -23,9 +23,6 @@ describe('Queue', function() {
             it('should return an empty queue if input array is empty', function() {
                 assert.equal(Queue.fromArray(array.empty).size, 0);
             });
-
-            // Skipped for now, implement when open sourcing for future developers
-            it('should throw a TypeError if input array is not an Array');
         });
     });
 
