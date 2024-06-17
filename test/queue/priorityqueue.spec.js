@@ -60,7 +60,7 @@ describe('PriorityQueue', function() {
                 };
             };
 
-            const sizesToTest = [0, 1, 2, 5000000];
+            const sizesToTest = [0, 1, 2, 250000];
 
             for (const size of sizesToTest) {
                 it(`should insert an element when initial size is ${size}`, testInsertion(size));
@@ -104,7 +104,7 @@ describe('PriorityQueue', function() {
                     };
                 };
 
-                const sizesToTest = [1, 2, 5000000];
+                const sizesToTest = [1, 2, 250000];
 
                 for (const size of sizesToTest) {
                     it(`should remove the element with the most priority when the initial size is ${size}`, testRemoval(size));

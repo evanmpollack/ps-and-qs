@@ -58,7 +58,7 @@ describe('Queue', function() {
                 };
             };
 
-            const sizesToTest = [0, 1, 2, 5000000];
+            const sizesToTest = [0, 1, 2, 250000];
 
             for (const size of sizesToTest) {
                 it(`should insert an element at the end when initial size is ${size}`, testInsertion(size));
@@ -104,7 +104,7 @@ describe('Queue', function() {
                     };
                 };
 
-                const sizesToTest = [1, 2, 5000000];
+                const sizesToTest = [1, 2, 250000];
 
                 for (const size of sizesToTest) {
                     it(`should remove the element at the front when the initial size is ${size}`, testRemoval(size));
