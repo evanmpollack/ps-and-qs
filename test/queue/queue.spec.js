@@ -26,7 +26,7 @@ describe('Queue', function() {
             it('should return an empty queue if input array is empty', function() {
                 const array = [];
                 const queue = Queue.fromArray(array);
-                assert.equal(queue.size, 0);
+                assert.equal(queue.size, array.length);
             });
         });
     });
@@ -42,10 +42,11 @@ describe('Queue', function() {
             const testInsertion = (size) => {
                 return function() {
                     const queue = createQueue(size);
-                    const expectedLastElement = -1;
-                    queue.enqueue(expectedLastElement);
+                    // unique to ensure validity of test
+                    const valueToInsert = -1;
+                    queue.enqueue(valueToInsert);
                     const lastElement = [...queue][queue.size - 1];
-                    assert.equal(lastElement, expectedLastElement);
+                    assert.equal(lastElement, valueToInsert);
                 };
             };
 

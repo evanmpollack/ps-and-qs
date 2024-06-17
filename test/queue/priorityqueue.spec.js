@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import PriorityQueue from '../../lib/queue/priorityqueue.js';
 import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
-import { array, queueToArray, loadQueue } from '../helpers.js';
 
 const maxNumberComparator = (a, b) => b - a;
 
@@ -9,94 +8,120 @@ describe('PriorityQueue', function() {
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of PriorityQueue', function() {
-                assert(PriorityQueue.fromArray(array.populated, maxNumberComparator) instanceof PriorityQueue);
+                const array = [];
+                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
+                assert(queue instanceof PriorityQueue);
             });
 
             it('size should be equal to the size of the input array', function() {
-                assert.equal(PriorityQueue.fromArray(array.populated, maxNumberComparator).size, array.populated.length);
+                const array = [1, 2, 3, 4, 5];
+                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
+                assert.equal(queue.size, array.length);
             });
 
             it('should return an empty priority queue if input array is empty', function() {
-                assert.equal(PriorityQueue.fromArray(array.empty).size, array.empty.length);
+                const array = [];
+                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
+                assert.equal(queue.size, array.length);
             });
 
             it('should not mutate the original array', function() {
-                const originalArray = array.populated;
-                PriorityQueue.fromArray(originalArray, maxNumberComparator)
-                assert.deepEqual(originalArray, array.populated);
+                const array = [1, 2, 3, 4, 5];
+                const arrayClone = [...array];
+                PriorityQueue.fromArray(array, maxNumberComparator);
+                assert.deepEqual(array, arrayClone);
             });
         });
     });
 
     context('operation', function() {
-        // Number not present in sample array to ensure test validity
-        const uniqueValue = Number.MAX_SAFE_INTEGER;
-        let priorityQueue;
+        // Helper method for operation context
+        const createQueue = (size) => {
+            const array = Array.from({ length: size }, (_, i) => i);
+            return PriorityQueue.fromArray(array, maxNumberComparator);
+        };
 
-        beforeEach(function() {
-            priorityQueue = new PriorityQueue(maxNumberComparator);
-        })
-
-        // Parameterize
         describe('#enqueue', function() {
-            beforeEach(function() {
-                loadQueue(priorityQueue, array.populated);
-            });
+            const testInsertion = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    // unique to ensure validity of test
+                    const valueToInsert = -1;
+                    queue.enqueue(valueToInsert);
+                    assert(([...queue]).includes(valueToInsert));
+                };
+            };
 
-            it('should insert the element into the priority queue', function() {
-                priorityQueue.enqueue(uniqueValue);
-                assert(queueToArray(priorityQueue).includes(uniqueValue));
-            });
+            const testSizeIncrement = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    queue.enqueue(-1);
+                    assert.equal(queue.size, size + 1);
+                };
+            };
 
-            it('size should increase by 1', function() {
-                const previousSize = priorityQueue.size;
-                priorityQueue.enqueue(uniqueValue);
-                assert.equal(priorityQueue.size, previousSize + 1);
-            });
+            const sizesToTest = [0, 1, 2, 5000000];
+
+            for (const size of sizesToTest) {
+                it(`should insert an element when initial size is ${size}`, testInsertion(size));
+                it(`size should increase to ${size + 1} when initial size is ${size}`, testSizeIncrement(size));
+            }
         });
 
         describe('#dequeue', function() {
             context('priority queue is empty', function() {
                 it('should throw an EmptyQueueError', function() {
+                    const queue = new PriorityQueue(maxNumberComparator);
                     const expectedError = new EmptyQueueError();
-                    assert.throws(priorityQueue.dequeue.bind(priorityQueue), expectedError);
+                    assert.throws(queue.dequeue.bind(queue), expectedError);
                 });
             });
 
-            // Parameterize
             context('priority queue is not empty', function() {
-                beforeEach(function() {
-                    loadQueue(priorityQueue, array.populated);
-                });
+                const testRemoval = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        const highestPriorityElement = [...queue][0];
+                        queue.dequeue();
+                        assert(!([...queue]).includes(highestPriorityElement));
+                    };
+                };
 
-                it('should remove the element with the most priority', function() {
-                    const highestPriorityElement = array.populated.sort(maxNumberComparator)[0];
-                    priorityQueue.dequeue();
-                    assert(!queueToArray(priorityQueue).includes(highestPriorityElement));
-                });
+                const testReturnValue = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        const highestPriorityElement = [...queue][0];
+                        const data = queue.dequeue();
+                        assert.equal(data, highestPriorityElement);
+                    };
+                };
 
-                it('should return the element with the most priority', function() {
-                    const highestPriorityElement = array.populated.sort(maxNumberComparator)[0];
-                    const actual = priorityQueue.dequeue();
-                    assert.equal(actual, highestPriorityElement);
-                });
+                const testSizeDecrement = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        queue.dequeue();
+                        assert.equal(queue.size, size - 1);
+                    };
+                };
 
-                it('size should decrease by 1', function() {
-                    const previousSize = priorityQueue.size;
-                    priorityQueue.dequeue();
-                    assert.equal(priorityQueue.size, previousSize - 1);
-                });
+                const sizesToTest = [1, 2, 5000000];
+
+                for (const size of sizesToTest) {
+                    it(`should remove the element with the most priority when the initial size is ${size}`, testRemoval(size));
+                    it(`should return the element with the most priority when the initial size is ${size}`, testReturnValue(size));
+                    it(`size should decrease to ${size - 1} when initial size is ${size}`, testSizeDecrement(size));
+                }
             });
         });
     });
 
     context('comparator', function() {
         it('should order correctly given a number comparator', function() {
-            const numbers = array.populated;
+            const numbers = [1, 2, 3, 4, 5];
             const numberComparator = maxNumberComparator;
-            const pq = PriorityQueue.fromArray(numbers, numberComparator);
+            const queue = PriorityQueue.fromArray(numbers, numberComparator);
             const expected = numbers.sort(numberComparator);
-            assert.deepEqual(queueToArray(pq), expected);
+            assert.deepEqual([...queue], expected);
         });
 
         it('should order correctly given a string comparator', function() {
@@ -118,9 +143,9 @@ describe('PriorityQueue', function() {
                     return charCode1 - charCode2;
                 }
             }
-            const pq = PriorityQueue.fromArray(strings, fourthLetterComparator);
+            const queue = PriorityQueue.fromArray(strings, fourthLetterComparator);
             const expected = strings.sort(fourthLetterComparator);
-            assert.deepEqual(queueToArray(pq), expected);
+            assert.deepEqual([...queue], expected);
         });
 
         it('should order correctly given an object comparator', function() {
@@ -147,9 +172,9 @@ describe('PriorityQueue', function() {
                 }
             ];
             const objectComparator = (a, b) => a.priority - b.priority;
-            const pq = PriorityQueue.fromArray(objects, objectComparator);
+            const queue = PriorityQueue.fromArray(objects, objectComparator);
             const expected = objects.sort(objectComparator);
-            assert.deepEqual(queueToArray(pq), expected);
+            assert.deepEqual([...queue], expected);
         });
     });
 });
