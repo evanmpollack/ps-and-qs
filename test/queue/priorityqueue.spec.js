@@ -176,5 +176,70 @@ describe('PriorityQueue', function() {
             const expected = objects.sort(objectComparator);
             assert.deepEqual([...queue], expected);
         });
+ 
+        it('should order correctly given a comparator that accounts for nulls', function() {
+            const objects = [
+                {
+                    priority: 500,
+                    task: () => {}
+                },
+                null,
+                {
+                    priority: 10,
+                    task: () => {}
+                },
+                {
+                    priority: 20,
+                    task: () => {}
+                },
+                {
+                    priority: 250,
+                    task: () => {}
+                }
+            ];
+            // Moves nullish data to the back
+            const objectComparator = (a, b) => {
+                if (!b) return -1;
+                if (!a) return 1;
+                return a.priority - b.priority;
+            };
+            const queue = PriorityQueue.fromArray(objects, objectComparator);
+            const expected = objects.sort(objectComparator);
+            assert.deepEqual([...queue], expected);
+        });
+
+        // split into two asserts because Array.sort ignores undefined
+        it('should order correctly given a comparator that accounts for sparse input', function() {
+            const objects = [
+                {
+                    priority: 500,
+                    task: () => {}
+                },
+                {
+                    priority: -2,
+                    task: () => {}
+                },
+                {
+                    priority: 10,
+                    task: () => {}
+                },
+                undefined,
+                {
+                    priority: 250,
+                    task: () => {}
+                }
+            ];
+            // Moved nullish data to the front
+            const objectComparator = (a, b) => {
+                if (!b) return 1;
+                if (!a) return -1;
+                return a.priority - b.priority;
+            };
+            const queue = PriorityQueue.fromArray(objects, objectComparator);
+            const expected = objects.filter(o => o !== undefined)
+                .sort(objectComparator);
+            assert.equal([...queue][0], undefined);
+            assert.deepEqual([...queue].slice(1), expected);
+        });
     });
 });
