@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import Queue from '../../lib/queue/queue.js';
 import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
 
-describe.only('Queue', function() { 
+describe('Queue', function() { 
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of Queue', function() {
@@ -32,37 +32,37 @@ describe.only('Queue', function() {
     });
 
     context('operation', function() {
+        // Helper method for operation context
+        const createQueue = (size) => {
+            const array = Array.from({ length: size }, (_, i) => i);
+            return Queue.fromArray(array);
+        };
+
         describe('#enqueue', function() {
-            const enqueueAtSizeTests = [
-                { array: [] },
-                { array: [1] },
-                { array: [1, 2] },
-                { array: Array.from({ length: 5000000 }, (_, i) => i) }
-            ];
-
-            // I don't think I'm supposed to do this, as the tests appear to be running slower
-            enqueueAtSizeTests.forEach(({ array }) => {
-                let queue;
-
-                // Resets queue to ensure each test is isolated
-                beforeEach(function() {
-                    queue = Queue.fromArray(array);
-                });
-
-                it(`should insert element at the end when initial size is ${array.length}`, function() {
-                    // unique to ensure validity of test
-                    const expectedLastElement = 0;
+            const testInsertion = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    const expectedLastElement = -1;
                     queue.enqueue(expectedLastElement);
                     const lastElement = [...queue][queue.size - 1];
                     assert.equal(lastElement, expectedLastElement);
-                });
+                };
+            };
 
-                it(`size should increase to ${array.length + 1} when initial size is ${array.length}`, function() {
-                    const previousSize = queue.size;
-                    queue.enqueue(0);
-                    assert.equal(queue.size, previousSize + 1);
-                });
-            });
+            const testSizeIncrement = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    queue.enqueue(-1);
+                    assert.equal(queue.size, size + 1);
+                };
+            };
+
+            const sizesToTest = [0, 1, 2, 5000000];
+
+            for (const size of sizesToTest) {
+                it(`should insert an element at the end when initial size is ${size}`, testInsertion(size));
+                it(`size should increase to ${size + 1} when initial size is ${size}`, testSizeIncrement(size));
+            }
         });
 
         describe('#dequeue', function() {
@@ -77,39 +77,39 @@ describe.only('Queue', function() {
             });
 
             context('queue is not empty', function() {
-                const dequeueAtSizeTests = [
-                    { array: [1] },
-                    { array: [1, 2] },
-                    { array: Array.from({ length: 5000000 }, (_, i) => i) }
-                ];
-                
-                // I don't think I'm supposed to do this, as the tests appear to be running slower
-                dequeueAtSizeTests.forEach(({ array }) => {
-                    let queue;
-
-                    // Resets queue to ensure each test is isolated
-                    beforeEach(function() {
-                        queue = Queue.fromArray(array);
-                    });
-
-                    it(`should remove the element at the front when initial size is ${array.length}`, function() {
+                const testRemoval = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
                         const firstElement = [...queue][0];
                         queue.dequeue();
                         assert(!([...queue]).includes(firstElement));
-                    });
+                    };
+                };
 
-                    it(`should return the element at the front when initial size is ${array.length}`, function() {
+                const testReturnValue = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
                         const firstElement = [...queue][0];
                         const data = queue.dequeue();
                         assert.equal(data, firstElement);
-                    });
+                    };
+                };
 
-                    it(`size should decrease to ${array.length - 1} when initial size is ${array.length}`, function() {
-                        const previousSize = queue.size;
+                const testSizeDecrement = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
                         queue.dequeue();
-                        assert.equal(queue.size, previousSize - 1);
-                    });
-                });
+                        assert.equal(queue.size, size - 1);
+                    };
+                };
+
+                const sizesToTest = [1, 2, 5000000];
+
+                for (const size of sizesToTest) {
+                    it(`should remove the element at the front when the initial size is ${size}`, testRemoval(size));
+                    it(`should return the element at the front when the initial size is ${size}`, testReturnValue(size));
+                    it(`size should decrease to ${size - 1} when initial size is ${size}`, testSizeDecrement(size));
+                }
             });
         });
     });
