@@ -1,94 +1,116 @@
 import assert from 'node:assert/strict';
 import Queue from '../../lib/queue/queue.js';
 import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
-import { array, queueToArray, loadQueue } from '../helpers.js';
 
 describe('Queue', function() { 
     context('creation', function() {
         describe('#fromArray', function() {
             it('should return an instance of Queue', function() {
-                assert(Queue.fromArray(array.populated) instanceof Queue);
+                const array = [];
+                const queue = Queue.fromArray(array);
+                assert(queue instanceof Queue);
             });
 
             it('should maintain the order of the input array', function() {
-                const queueFromArray = Queue.fromArray(array.populated);
-                const queueAsArray = queueToArray(queueFromArray);
-                assert.deepEqual(queueAsArray, array.populated);
+                const array = [1, 2, 3, 4, 5];
+                const queue = Queue.fromArray(array);
+                assert.deepEqual([...queue], array);
             });
 
             it('size should be equal to the size of the input array', function() {
-                assert.equal(Queue.fromArray(array.populated).size, array.populated.length);
+                const array = [1, 2, 3, 4, 5];
+                const queue = Queue.fromArray(array);
+                assert.equal(queue.size, array.length);
             });
 
             it('should return an empty queue if input array is empty', function() {
-                assert.equal(Queue.fromArray(array.empty).size, 0);
+                const array = [];
+                const queue = Queue.fromArray(array);
+                assert.equal(queue.size, array.length);
             });
         });
     });
 
     context('operation', function() {
-        let queue;
+        // Helper method for operation context
+        const createQueue = (size) => {
+            const array = Array.from({ length: size }, (_, i) => i);
+            return Queue.fromArray(array);
+        };
 
-        beforeEach(function() {
-            queue = new Queue();
-        });
-
-        // Parameterize
         describe('#enqueue', function() {
-            beforeEach(function() {
-                loadQueue(queue, array.populated);
-            });
+            const testInsertion = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    // unique to ensure validity of test
+                    const valueToInsert = -1;
+                    queue.enqueue(valueToInsert);
+                    const lastElement = [...queue][queue.size - 1];
+                    assert.equal(lastElement, valueToInsert);
+                };
+            };
 
-            it('should insert element at the end', function() {
-                const expectedLastElement = 0;
-                queue.enqueue(expectedLastElement);
-                const lastElement = (() => {
-                    let curr;
-                    while(!queue.empty) curr = queue.dequeue();
-                    return curr;
-                })();
-                assert.equal(lastElement, expectedLastElement);
-            });
+            const testSizeIncrement = (size) => {
+                return function() {
+                    const queue = createQueue(size);
+                    queue.enqueue(-1);
+                    assert.equal(queue.size, size + 1);
+                };
+            };
 
-            it('size should increase by 1', function() {
-                const previousSize = queue.size;
-                queue.enqueue(0);
-                assert.equal(queue.size, previousSize + 1);
-            });
+            const sizesToTest = [0, 1, 2, 250000];
+
+            for (const size of sizesToTest) {
+                it(`should insert an element at the end when initial size is ${size}`, testInsertion(size));
+                it(`size should increase to ${size + 1} when initial size is ${size}`, testSizeIncrement(size));
+            }
         });
 
         describe('#dequeue', function() {
             context('queue is empty', function() {
                 it('should throw an EmptyQueueError', function() {
+                    const queue = new Queue();
                     const expectedError = new EmptyQueueError();
                     // This bound to instance method because instance reference 
                     // is not passed in with function reference
                     assert.throws(queue.dequeue.bind(queue), expectedError);
                 });
             });
-            
-            // Parameterize
+
             context('queue is not empty', function() {
-                beforeEach(function() {
-                    loadQueue(queue, array.populated);
-                });
+                const testRemoval = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        const firstElement = [...queue][0];
+                        queue.dequeue();
+                        assert(!([...queue]).includes(firstElement));
+                    };
+                };
 
-                it('should remove the element at the front', function() {
-                    const firstElement = array.populated[0];
-                    queue.dequeue();
-                    assert(!queueToArray(queue).includes(firstElement));
-                });
+                const testReturnValue = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        const firstElement = [...queue][0];
+                        const data = queue.dequeue();
+                        assert.equal(data, firstElement);
+                    };
+                };
 
-                it('should return the element at the front', function() {
-                    const data = queue.dequeue();
-                    assert.equal(data, array.populated[0]);
-                });
+                const testSizeDecrement = (size) => {
+                    return function() {
+                        const queue = createQueue(size);
+                        queue.dequeue();
+                        assert.equal(queue.size, size - 1);
+                    };
+                };
 
-                it('size should decrease by 1', function() {
-                    const previousSize = queue.size;
-                    queue.dequeue();
-                    assert.equal(queue.size, previousSize - 1);
-                });
+                const sizesToTest = [1, 2, 250000];
+
+                for (const size of sizesToTest) {
+                    it(`should remove the element at the front when the initial size is ${size}`, testRemoval(size));
+                    it(`should return the element at the front when the initial size is ${size}`, testReturnValue(size));
+                    it(`size should decrease to ${size - 1} when initial size is ${size}`, testSizeDecrement(size));
+                }
             });
         });
     });

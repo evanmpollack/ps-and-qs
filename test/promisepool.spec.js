@@ -1,21 +1,26 @@
 import assert from 'node:assert/strict';
 import PromisePool from '../lib/promisepool.js';
 import PromisePoolError from '../lib/error/promisepoolerror.js';
-import { array, type } from './helpers.js';
 
 /**
- * Supported construction methods:
- * 1. Create default instance, chain methods on instance
- * 2. Chain methods statically
- * 3. Options param
- * 4. Set each property line by line
+ * Helper object containing a short list of types to use when testing validation
  */
-
-const types = Object.entries(type);
+const types = Object.entries({
+    string: 'test',
+    number: 1,
+    bigint: 1n,
+    boolean: true,
+    symbol: Symbol(),
+    null: null,
+    undefined: undefined,
+    object: {},
+    array: [],
+    function: () => {}
+});
 
 describe('PromisePool', function() {
     describe('init', function() {
-        const tasks = array.populated;
+        const tasks = [1, 2, 3, 4, 5];
         const concurrency = 1;
         const priority = true;
         const comparator = (a, b) => a - b;

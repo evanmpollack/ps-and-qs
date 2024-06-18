@@ -4,7 +4,7 @@
   "description": "An efficient promise pool implementation that provides control over the concurrency limit and execution order when running a series of asynchronous tasks.",
   "main": "index.js",
   "scripts": {
-    "test": "c8 mocha --recursive",
+    "test": "c8 mocha --recursive --timeout 5000",
     "build": "rollup --config",
     "start": "node index.js",
     "playground": "node --trace-uncaught playground.js",

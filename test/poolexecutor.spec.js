@@ -4,7 +4,6 @@ import PoolExecutor from '../lib/poolexecutor.js';
 import Queue from '../lib/queue/queue.js';
 import PriorityQueue from '../lib/queue/priorityqueue.js';
 import EmptyQueueError from '../lib/error/emptyqueueerror.js';
-import { array } from './helpers.js';
 
 /**
  * Helper object that contains all of the task statuses needed for unit testing.
@@ -75,7 +74,7 @@ describe('PoolExecutor', function() {
         // Should never reject
         context('pool promise', function() {
             it('should resolve to an empty array if the task queue is empty', async function() {
-                const tasks = array.empty;
+                const tasks = [];
                 const result = await execute(tasks)
                 assert.deepEqual(result, tasks);
             });
