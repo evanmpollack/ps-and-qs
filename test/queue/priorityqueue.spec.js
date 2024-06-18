@@ -36,15 +36,15 @@ describe('PriorityQueue', function() {
 
     context('operation', function() {
         // Helper method for operation context
-        const createQueue = (size) => {
+        const createPriorityQueue = (size, comparator=maxNumberComparator) => {
             const array = Array.from({ length: size }, (_, i) => i);
-            return PriorityQueue.fromArray(array, maxNumberComparator);
+            return PriorityQueue.fromArray(array, comparator);
         };
 
         describe('#enqueue', function() {
             const testInsertion = (size) => {
                 return function() {
-                    const queue = createQueue(size);
+                    const queue = createPriorityQueue(size);
                     // unique to ensure validity of test
                     const valueToInsert = -1;
                     queue.enqueue(valueToInsert);
@@ -54,7 +54,7 @@ describe('PriorityQueue', function() {
 
             const testSizeIncrement = (size) => {
                 return function() {
-                    const queue = createQueue(size);
+                    const queue = createPriorityQueue(size);
                     queue.enqueue(-1);
                     assert.equal(queue.size, size + 1);
                 };
@@ -80,7 +80,7 @@ describe('PriorityQueue', function() {
             context('priority queue is not empty', function() {
                 const testRemoval = (size) => {
                     return function() {
-                        const queue = createQueue(size);
+                        const queue = createPriorityQueue(size);
                         const highestPriorityElement = [...queue][0];
                         queue.dequeue();
                         assert(!([...queue]).includes(highestPriorityElement));
@@ -89,7 +89,7 @@ describe('PriorityQueue', function() {
 
                 const testReturnValue = (size) => {
                     return function() {
-                        const queue = createQueue(size);
+                        const queue = createPriorityQueue(size);
                         const highestPriorityElement = [...queue][0];
                         const data = queue.dequeue();
                         assert.equal(data, highestPriorityElement);
@@ -98,7 +98,7 @@ describe('PriorityQueue', function() {
 
                 const testSizeDecrement = (size) => {
                     return function() {
-                        const queue = createQueue(size);
+                        const queue = createPriorityQueue(size);
                         queue.dequeue();
                         assert.equal(queue.size, size - 1);
                     };
