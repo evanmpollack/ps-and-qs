@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import util from 'node:util';
 import PoolExecutor from '../lib/poolexecutor.js';
 import Queue from '../lib/queue/queue.js';
 import PriorityQueue from '../lib/queue/priorityqueue.js';
@@ -148,7 +147,7 @@ describe('PoolExecutor', function() {
 
             it('should reject given a task object without a task property', async function() {
                 const invalidTaskObject = { notATask: null, tesk: undefined, priority: 72 };
-                const reason = `Cannot find task property in ${util.inspect(invalidTaskObject)}`;
+                const reason = `Cannot find task property in ${JSON.stringify(invalidTaskObject)}`;
                 const [ result ] = await execute([invalidTaskObject]);
                 const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
@@ -157,7 +156,7 @@ describe('PoolExecutor', function() {
             // Test against all types?
             it('should reject given a null task object', async function() {
                 const nullTaskObject = null;
-                const reason = `Cannot find task property in ${util.inspect(nullTaskObject)}`;
+                const reason = `Cannot find task property in ${JSON.stringify(nullTaskObject)}`;
                 const [ result ] = await execute([nullTaskObject]);
                 const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
@@ -165,7 +164,7 @@ describe('PoolExecutor', function() {
 
             it('should reject given an undefined task object', async function() {
                 const undefinedTaskObject = undefined;
-                const reason = `Cannot find task property in ${util.inspect(undefinedTaskObject)}`;
+                const reason = `Cannot find task property in ${JSON.stringify(undefinedTaskObject)}`;
                 const [ result ] = await execute([undefinedTaskObject]);
                 const expected = createTaskResult(reason, true);
                 assert.deepEqual(result, expected);
