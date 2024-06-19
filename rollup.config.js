@@ -1,15 +1,20 @@
 import terser from '@rollup/plugin-terser';
 
 export default {
-    input: 'lib/promisepool.js',
+    input: './src/promisepool.js',
     output: [
         {
-            file: './browser/promisepool.js',
-            format: 'umd',
+            file: './dist/promisepool.js',
+            format: 'esm',
             name: 'PromisePool'
         },
         {
-            file: './browser/promisepool.min.js',
+            file: './dist/promisepool.cjs',
+            format: 'cjs',
+            name: 'PromisePool'
+        },
+        {
+            file: './dist/promisepool.min.js',
             format: 'iife',
             name: 'PromisePool',
             plugins: [terser()]
