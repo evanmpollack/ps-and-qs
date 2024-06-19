@@ -1,4 +1,4 @@
-import PromisePool from '../lib/promisepool.js';
+import PromisePool from '../dist/promisepool.js';
 
 const LIMIT = 100;
 const NUM_TASKS = 3000;
