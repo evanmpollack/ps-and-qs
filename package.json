@@ -8,6 +8,11 @@
     "import": "./dist/promisepool.js",
     "require": "./dist/promisepool.cjs"
   },
+  "files": [
+    "dist/*", 
+    "package.json",
+    "README.md"
+  ],
   "scripts": {
     "test": "c8 mocha --recursive --timeout 5000",
     "build": "rollup --config",
