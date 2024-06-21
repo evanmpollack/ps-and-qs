@@ -1,0 +1,21 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # Figure out how to include test
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      uses: actions/setup-node@v3
+      with:
+        node-version: #??
+        cache: 'npm'
+    # - run test
+    - run: npm build
+    - run: npm publish
