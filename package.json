@@ -30,6 +30,10 @@
   ],
   "author": "Evan Pollack",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evanmpollack/ps-and-qs.git"
+  },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "c8": "^9.1.0",
