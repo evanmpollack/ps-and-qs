@@ -29,7 +29,7 @@ npm i @evanmpollack/ps-and-qs
 
 #### Script Tag
 ```
-<script src="https://cdn.jsdelivr.net/npm/@evanmpollack/ps-and-qs@1.0.0/dist/promisepool.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@evanmpollack/ps-and-qs@1.0.2/dist/promisepool.min.js"></script>
 ```
 
 ### Examples
