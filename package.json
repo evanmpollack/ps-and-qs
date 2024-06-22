@@ -1,12 +1,21 @@
 {
-  "name": "ps-and-qs",
+  "name": "@evanmpollack/ps-and-qs",
   "version": "1.0.0",
   "description": "An efficient promise pool implementation that provides control over the concurrency limit and execution order when running a series of asynchronous tasks.",
-  "main": "index.js",
+  "type": "module",
+  "main": "./dist/promisepool.js",
+  "exports": {
+    "import": "./dist/promisepool.js",
+    "require": "./dist/promisepool.cjs"
+  },
+  "files": [
+    "dist/*", 
+    "package.json",
+    "README.md"
+  ],
   "scripts": {
     "test": "c8 mocha --recursive --timeout 5000",
     "build": "rollup --config",
-    "start": "node index.js",
     "playground": "node --trace-uncaught playground.js",
     "example": "node ./example/performance.js"
   },
@@ -21,7 +30,6 @@
   ],
   "author": "Evan Pollack",
   "license": "ISC",
-  "type": "module",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "c8": "^9.1.0",
