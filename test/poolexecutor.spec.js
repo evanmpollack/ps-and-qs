@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import PoolExecutor from '../lib/poolexecutor.js';
-import Queue from '../lib/queue/queue.js';
-import PriorityQueue from '../lib/queue/priorityqueue.js';
-import EmptyQueueError from '../lib/error/emptyqueueerror.js';
+import PoolExecutor from '../src/poolexecutor.js';
+import Queue from '../src/queue/queue.js';
+import PriorityQueue from '../src/queue/priorityqueue.js';
+import EmptyQueueError from '../src/error/emptyqueueerror.js';
 
 /**
  * Helper object that contains all of the task statuses needed for unit testing.

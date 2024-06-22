@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import PriorityQueue from '../../lib/queue/priorityqueue.js';
-import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
+import PriorityQueue from '../../src/queue/priorityqueue.js';
+import EmptyQueueError from '../../src/error/emptyqueueerror.js';
 
 const maxNumberComparator = (a, b) => b - a;
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import PromisePool from '../lib/promisepool.js';
-import PromisePoolError from '../lib/error/promisepoolerror.js';
+import PromisePool from '../src/promisepool.js';
+import PromisePoolError from '../src/error/promisepoolerror.js';
 
 /**
  * Helper object containing a short list of types to use when testing validation

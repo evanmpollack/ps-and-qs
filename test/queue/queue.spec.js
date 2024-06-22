@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import Queue from '../../lib/queue/queue.js';
-import EmptyQueueError from '../../lib/error/emptyqueueerror.js';
+import Queue from '../../src/queue/queue.js';
+import EmptyQueueError from '../../src/error/emptyqueueerror.js';
 
 describe('Queue', function() { 
     context('creation', function() {
