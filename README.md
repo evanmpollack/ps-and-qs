@@ -9,6 +9,7 @@ Designed to be an improvement of batch processing with [`Promise.allSettled()`](
 
 - Pooling instead of batching
 - Flexible configuration
+- ESM, CJS, and Browser support
 - Zero dependencies
 
 This library is similar to other popular concurrency limiting solutions like [p-limit](https://www.npmjs.com/package/p-limit), [es6-promise-pool](https://www.npmjs.com/package/es6-promise-pool), 
@@ -19,6 +20,17 @@ Exposes the `PromisePool` class which has methods to configure and start executi
 1. Each task is inserted into a queue.
 2. Tasks are launched in succession until the concurrency limit is reached.
 3. Each completed task is responsible for launching the next one until the queue is empty.
+
+### Installation
+#### NPM
+```
+npm i @evanmpollack/ps-and-qs
+```
+
+### Script Tag
+```
+<script src="https://cdn.jsdelivr.net/npm/@evanmpollack/ps-and-qs@1.0.0/promisepool.min.js></script>
+```
 
 ### Examples
 Fluent Interface
@@ -105,10 +117,11 @@ Leverages [Promise.allSettled()](https://developer.mozilla.org/en-US/docs/Web/Ja
 <!-- fromIterable -->
 - `fromArray()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array.
 
-### Supported Node.js Versions
-Developed using Node 21 and tested against Node 18, 20, and 22, the current and LTS releases at the time of writing this.
+### Supported Node Versions
+Developed and built with Node 21 and tested against Node 18, 20, and 22, the current and LTS releases at the time of writing this.
 
-_Note: While not tested, this library should be compatible with Node 14 and 16. The library uses ES6 features that have been officially supported since Node 13, including ESM, async/await, and classes._
+<!-- Update after event target addition --> 
+<!--_Note: While not tested, this library should be compatible with Node 16. The library uses ES6 features that have been officially supported since Node 13, including ESM, async/await, and classes._-->
 
 ### Planned Enhancements
 1. Allow input iterables instead of just `Array`
