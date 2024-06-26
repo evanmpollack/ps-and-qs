@@ -34,15 +34,18 @@ export default class PriorityQueue {
     }
 
     /**
-     * Creation method to build a priority queue from an array.
+     * Creation method to build a priority queue from an iterable.
      * Ordering defined by comparator.
      * 
-     * @param {Array} array 
+     * @param {Iterable | AsyncIterable} iterable 
      * @param {Function} comparator 
      * @returns {PriorityQueue}
      */
-    static fromArray(array, comparator) {
-        const copy = Array.from(array);
+    static async fromIterable(iterable, comparator) {
+        const copy = [];
+        for await (const item of iterable) {
+            copy.push(item);
+        }
         const instance = new PriorityQueue(comparator);
         instance.#heap = PriorityQueue.#heapify(copy, instance.#comparator);
         return instance;

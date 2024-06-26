@@ -34,14 +34,16 @@ export default class Queue {
     }
 
     /**
-     * Creation method to build a queue from an array.
-     * Maintains order of original array.
+     * Creation method to build a queue from an iterable.
+     * Maintains order of original iterable.
      * 
-     * @param {Array} array
+     * @param {Iterable | AsyncIterable} iterable
      */
-    static fromArray(array) {
+    static async fromIterable(iterable) {
         const instance = new Queue();
-        array.forEach(item => instance.enqueue(item));
+        for await (const item of iterable) {
+            instance.enqueue(item);
+        }
         return instance;
     }
 
