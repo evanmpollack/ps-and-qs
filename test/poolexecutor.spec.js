@@ -54,10 +54,10 @@ const createTaskResult = (message, error=false) => {
 }
 
 /**
- * Executes an array of tasks using PoolExecutor. 
+ * Executes a collection of tasks using PoolExecutor. 
  * If priority flag is true, a comparator must be provided.
  * 
- * @param {Iterable | AsyncIterable} iterable task array
+ * @param {Iterable | AsyncIterable} iterable task collection
  * @param {Boolean} priority flag to determine what type of queue to use
  * @param {Function} comparator ordering function to be used if priority is true
  * @returns {Promise<Object[]>} task results

@@ -82,7 +82,7 @@ const results = await pool.start();
 3. Call the start() method and wait for results.
 
 #### Pool Properties
-- Tasks: an array of task objects formatted into the expected task structure. Defaults to `[]` if not specified.
+- Tasks: a collection of task objects formatted into the expected task structure. Defaults to `[]` if not specified.
     - _Requirements: Must be `Iterable`_
     - _Note: `AsyncIterable` is supported. However, the pool won't start executing until the `AsyncIterable` is consumed_
 - Concurrency: the maximum number of tasks that can run at once. Defaults to `100` if not specified.
@@ -116,7 +116,7 @@ Leverages [Promise.allSettled()](https://developer.mozilla.org/en-US/docs/Web/Ja
 #### Priority Queue
 - Uses an array-based heap implementation under the hood to ensure logarithmic time (`O(log(n))`) enqueue and dequeue.
 
-- `fromIterable()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array.
+- `fromIterable()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the iterable.
 
 ### Supported Node Versions
 Developed and built with Node 21 and tested against Node 18, 20, and 22, the current and LTS releases at the time of writing this.
