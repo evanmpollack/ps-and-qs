@@ -38,6 +38,7 @@ export default class Queue {
      * Maintains order of original iterable.
      * 
      * @param {Iterable | AsyncIterable} iterable
+     * @returns {Promise<Queue>}
      */
     static async fromIterable(iterable) {
         const instance = new Queue();
