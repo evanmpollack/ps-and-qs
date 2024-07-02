@@ -65,8 +65,8 @@ export default class PoolExecutor {
      * 
      * Note: invalid task means no task property or task property is not a function.
      * 
-     * @param {*} element task object
-     * @returns {Function} task function
+     * @param {*} element - task object
+     * @returns {Function} - task function
      */
     #getTask(element) {
         let target = 'task';
@@ -88,8 +88,8 @@ export default class PoolExecutor {
     /**
      * Runs a given task using the Promise API and returns the result.
      * 
-     * @param {Function} task task function
-     * @returns {Promise<PromiseSettledResult>} task result
+     * @param {Function} task - task function
+     * @returns {Promise<PromiseSettledResult>} - task result
      */
     async #runTask(task) {
         let result;
