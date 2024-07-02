@@ -6,45 +6,50 @@ const maxNumberComparator = (a, b) => b - a;
 
 describe('PriorityQueue', function() {
     context('creation', function() {
-        describe('#fromArray', function() {
-            it('should return an instance of PriorityQueue', function() {
-                const array = [];
-                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
+        describe('#fromIterable', function() {
+            it('should return an instance of PriorityQueue', async function() {
+                const iterable = [];
+                const queue = await PriorityQueue.fromIterable(iterable, maxNumberComparator);
                 assert(queue instanceof PriorityQueue);
             });
 
-            it('size should be equal to the size of the input array', function() {
-                const array = [1, 2, 3, 4, 5];
-                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
-                assert.equal(queue.size, array.length);
+            it('size should be equal to the size of the input iterable', async function() {
+                // Declared outside generator because generators can only be iterated over once
+                // Also, the spread operator doesn't support async generators
+                const values = [1, 2, 3, 4, 5];
+                const iterable = (async function*() {
+                    yield* values;
+                })();
+                const queue = await PriorityQueue.fromIterable(iterable, maxNumberComparator);
+                assert.equal(queue.size, values.length);
             });
 
-            it('should return an empty priority queue if input array is empty', function() {
-                const array = [];
-                const queue = PriorityQueue.fromArray(array, maxNumberComparator);
-                assert.equal(queue.size, array.length);
+            it('should return an empty priority queue if input iterable is empty', async function() {
+                const iterable = (function*() {})();
+                const queue = await PriorityQueue.fromIterable(iterable, maxNumberComparator);
+                assert.equal(queue.size, 0);
             });
 
-            it('should not mutate the original array', function() {
-                const array = [1, 2, 3, 4, 5];
-                const arrayClone = [...array];
-                PriorityQueue.fromArray(array, maxNumberComparator);
-                assert.deepEqual(array, arrayClone);
+            it('should not mutate the original iterable', async function() {
+                const iterable = [1, 2, 3, 4, 5];
+                const iterableClone = [...iterable];
+                await PriorityQueue.fromIterable(iterable, maxNumberComparator);
+                assert.deepEqual(iterable, iterableClone);
             });
         });
     });
 
     context('operation', function() {
         // Helper method for operation context
-        const createPriorityQueue = (size, comparator=maxNumberComparator) => {
+        const createPriorityQueue = async (size, comparator=maxNumberComparator) => {
             const array = Array.from({ length: size }, (_, i) => i);
-            return PriorityQueue.fromArray(array, comparator);
+            return await PriorityQueue.fromIterable(array, comparator);
         };
 
         describe('#enqueue', function() {
             const testInsertion = (size) => {
-                return function() {
-                    const queue = createPriorityQueue(size);
+                return async function() {
+                    const queue = await createPriorityQueue(size);
                     // unique to ensure validity of test
                     const valueToInsert = -1;
                     queue.enqueue(valueToInsert);
@@ -53,8 +58,8 @@ describe('PriorityQueue', function() {
             };
 
             const testSizeIncrement = (size) => {
-                return function() {
-                    const queue = createPriorityQueue(size);
+                return async function() {
+                    const queue = await createPriorityQueue(size);
                     queue.enqueue(-1);
                     assert.equal(queue.size, size + 1);
                 };
@@ -79,8 +84,8 @@ describe('PriorityQueue', function() {
 
             context('priority queue is not empty', function() {
                 const testRemoval = (size) => {
-                    return function() {
-                        const queue = createPriorityQueue(size);
+                    return async function() {
+                        const queue = await createPriorityQueue(size);
                         const highestPriorityElement = [...queue][0];
                         queue.dequeue();
                         assert(!([...queue]).includes(highestPriorityElement));
@@ -88,8 +93,8 @@ describe('PriorityQueue', function() {
                 };
 
                 const testReturnValue = (size) => {
-                    return function() {
-                        const queue = createPriorityQueue(size);
+                    return async function() {
+                        const queue = await createPriorityQueue(size);
                         const highestPriorityElement = [...queue][0];
                         const data = queue.dequeue();
                         assert.equal(data, highestPriorityElement);
@@ -97,8 +102,8 @@ describe('PriorityQueue', function() {
                 };
 
                 const testSizeDecrement = (size) => {
-                    return function() {
-                        const queue = createPriorityQueue(size);
+                    return async function() {
+                        const queue = await createPriorityQueue(size);
                         queue.dequeue();
                         assert.equal(queue.size, size - 1);
                     };
@@ -116,15 +121,15 @@ describe('PriorityQueue', function() {
     });
 
     context('comparator', function() {
-        it('should order correctly given a number comparator', function() {
+        it('should order correctly given a number comparator', async function() {
             const numbers = [1, 2, 3, 4, 5];
             const numberComparator = maxNumberComparator;
-            const queue = PriorityQueue.fromArray(numbers, numberComparator);
+            const queue = await PriorityQueue.fromIterable(numbers, numberComparator);
             const expected = numbers.sort(numberComparator);
             assert.deepEqual([...queue], expected);
         });
 
-        it('should order correctly given a string comparator', function() {
+        it('should order correctly given a string comparator', async function() {
             const strings = [
                 'cheese',
                 'two',
@@ -143,12 +148,12 @@ describe('PriorityQueue', function() {
                     return charCode1 - charCode2;
                 }
             }
-            const queue = PriorityQueue.fromArray(strings, fourthLetterComparator);
+            const queue = await PriorityQueue.fromIterable(strings, fourthLetterComparator);
             const expected = strings.sort(fourthLetterComparator);
             assert.deepEqual([...queue], expected);
         });
 
-        it('should order correctly given an object comparator', function() {
+        it('should order correctly given an object comparator', async function() {
             const objects = [
                 {
                     priority: 500,
@@ -172,12 +177,12 @@ describe('PriorityQueue', function() {
                 }
             ];
             const objectComparator = (a, b) => a.priority - b.priority;
-            const queue = PriorityQueue.fromArray(objects, objectComparator);
+            const queue = await PriorityQueue.fromIterable(objects, objectComparator);
             const expected = objects.sort(objectComparator);
             assert.deepEqual([...queue], expected);
         });
  
-        it('should order correctly given a comparator that accounts for nulls', function() {
+        it('should order correctly given a comparator that accounts for nulls', async function() {
             const objects = [
                 {
                     priority: 500,
@@ -203,13 +208,13 @@ describe('PriorityQueue', function() {
                 if (!a) return 1;
                 return a.priority - b.priority;
             };
-            const queue = PriorityQueue.fromArray(objects, objectComparator);
+            const queue = await PriorityQueue.fromIterable(objects, objectComparator);
             const expected = objects.sort(objectComparator);
             assert.deepEqual([...queue], expected);
         });
 
         // split into two asserts because Array.sort ignores undefined
-        it('should order correctly given a comparator that accounts for sparse input', function() {
+        it('should order correctly given a comparator that accounts for sparse input', async function() {
             const objects = [
                 {
                     priority: 500,
@@ -235,7 +240,7 @@ describe('PriorityQueue', function() {
                 if (!a) return -1;
                 return a.priority - b.priority;
             };
-            const queue = PriorityQueue.fromArray(objects, objectComparator);
+            const queue = await PriorityQueue.fromIterable(objects, objectComparator);
             const expected = objects.filter(o => o !== undefined)
                 .sort(objectComparator);
             assert.equal([...queue][0], undefined);

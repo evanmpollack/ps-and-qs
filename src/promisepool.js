@@ -15,7 +15,8 @@ export default class PromisePool {
     #comparator;
 
     set tasks(tasks) {
-        if (!Array.isArray(tasks)) throw new PromisePoolError('Tasks must be an Array');
+        const isIterable = typeof tasks?.[Symbol.iterator] === 'function' || typeof tasks?.[Symbol.asyncIterator] === 'function';
+        if (!isIterable) throw new PromisePoolError('Tasks must be an iterable');
         this.#tasks = tasks;
     }
 
@@ -101,7 +102,7 @@ export default class PromisePool {
     }
 
     async start() {
-        const queue = (this.priority) ? PriorityQueue.fromArray(this.tasks, this.comparator) : Queue.fromArray(this.tasks);
+        const queue = await ((this.priority) ? PriorityQueue.fromIterable(this.tasks, this.comparator) : Queue.fromIterable(this.tasks));
         return await (new PoolExecutor(queue, this.concurrency)).start();
     }
 }

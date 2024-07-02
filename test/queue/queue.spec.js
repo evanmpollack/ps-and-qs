@@ -4,44 +4,53 @@ import EmptyQueueError from '../../src/error/emptyqueueerror.js';
 
 describe('Queue', function() { 
     context('creation', function() {
-        describe('#fromArray', function() {
-            it('should return an instance of Queue', function() {
-                const array = [];
-                const queue = Queue.fromArray(array);
+        describe('#fromIterable', function() {
+            it('should return an instance of Queue', async function() {
+                const iterable = [];
+                const queue = await Queue.fromIterable(iterable);
                 assert(queue instanceof Queue);
             });
 
-            it('should maintain the order of the input array', function() {
-                const array = [1, 2, 3, 4, 5];
-                const queue = Queue.fromArray(array);
-                assert.deepEqual([...queue], array);
+            it('should maintain the order of the input iterable', async function() {
+                // Declared outside generator because generators can only be iterated over once
+                const values = [1, 2, 3, 4, 5];
+                const iterable = (function*() {
+                    yield* values;
+                })();
+                const queue = await Queue.fromIterable(iterable);
+                assert.deepEqual([...queue], values);
             });
 
-            it('size should be equal to the size of the input array', function() {
-                const array = [1, 2, 3, 4, 5];
-                const queue = Queue.fromArray(array);
-                assert.equal(queue.size, array.length);
+            it('size should be equal to the size of the input iterable', async function() {
+                // Declared outside generator because generators can only be iterated over once
+                // Also, the spread operator doesn't support async generators
+                const values = [2];
+                const iterable = (async function*() {
+                    yield* values;
+                })();
+                const queue = await Queue.fromIterable(iterable);
+                assert.equal(queue.size, values.length);
             });
 
-            it('should return an empty queue if input array is empty', function() {
-                const array = [];
-                const queue = Queue.fromArray(array);
-                assert.equal(queue.size, array.length);
+            it('should return an empty queue if input iterable is empty', async function() {
+                const iterable = (function*() {})();
+                const queue = await Queue.fromIterable(iterable);
+                assert.equal(queue.size, 0);
             });
         });
     });
 
     context('operation', function() {
         // Helper method for operation context
-        const createQueue = (size) => {
+        const createQueue = async (size) => {
             const array = Array.from({ length: size }, (_, i) => i);
-            return Queue.fromArray(array);
+            return await Queue.fromIterable(array);
         };
 
         describe('#enqueue', function() {
             const testInsertion = (size) => {
-                return function() {
-                    const queue = createQueue(size);
+                return async function() {
+                    const queue = await createQueue(size);
                     // unique to ensure validity of test
                     const valueToInsert = -1;
                     queue.enqueue(valueToInsert);
@@ -51,8 +60,8 @@ describe('Queue', function() {
             };
 
             const testSizeIncrement = (size) => {
-                return function() {
-                    const queue = createQueue(size);
+                return async function() {
+                    const queue = await createQueue(size);
                     queue.enqueue(-1);
                     assert.equal(queue.size, size + 1);
                 };
@@ -79,8 +88,8 @@ describe('Queue', function() {
 
             context('queue is not empty', function() {
                 const testRemoval = (size) => {
-                    return function() {
-                        const queue = createQueue(size);
+                    return async function() {
+                        const queue = await createQueue(size);
                         const firstElement = [...queue][0];
                         queue.dequeue();
                         assert(!([...queue]).includes(firstElement));
@@ -88,8 +97,8 @@ describe('Queue', function() {
                 };
 
                 const testReturnValue = (size) => {
-                    return function() {
-                        const queue = createQueue(size);
+                    return async function() {
+                        const queue = await createQueue(size);
                         const firstElement = [...queue][0];
                         const data = queue.dequeue();
                         assert.equal(data, firstElement);
@@ -97,8 +106,8 @@ describe('Queue', function() {
                 };
 
                 const testSizeDecrement = (size) => {
-                    return function() {
-                        const queue = createQueue(size);
+                    return async function() {
+                        const queue = await createQueue(size);
                         queue.dequeue();
                         assert.equal(queue.size, size - 1);
                     };

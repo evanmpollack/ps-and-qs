@@ -54,8 +54,11 @@ describe('PromisePool', function() {
             });
 
             const tasksInvalidTypeTests = {
-                inputs: types.filter(([key, _]) => key !== 'array'),
-                expected: new PromisePoolError('Tasks must be an Array')
+                inputs: types.filter(([_, value]) => {
+                    const isIterable = typeof value?.[Symbol.iterator] === 'function' || typeof value?.[Symbol.asyncIterator] === 'function';
+                    return !isIterable;
+                }),
+                expected: new PromisePoolError('Tasks must be an iterable')
             };
             tasksInvalidTypeTests.inputs.forEach(([key, value]) => {
                 it(`tasks should throw a PromisePoolError when input is ${key}`, function() {

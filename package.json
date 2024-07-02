@@ -9,7 +9,7 @@
     "require": "./dist/promisepool.cjs"
   },
   "files": [
-    "dist/*", 
+    "dist/*",
     "package.json",
     "README.md"
   ],

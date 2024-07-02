@@ -13,7 +13,7 @@ Designed to be an improvement of batch processing with [`Promise.allSettled()`](
 - Zero dependencies
 
 This library is similar to other popular concurrency limiting solutions like [p-limit](https://www.npmjs.com/package/p-limit), [es6-promise-pool](https://www.npmjs.com/package/es6-promise-pool), 
-and [@supercharge/promise-pool](https://www.npmjs.com/package/@supercharge/promise-pool). It expands on those by adding support for tasks that should be executed based on priority rather than insertion order.
+and [@supercharge/promise-pool](https://www.npmjs.com/package/@supercharge/promise-pool). It expands on those by adding support for tasks that should be executed based on priority.
 
 ### Details
 Exposes the `PromisePool` class which has methods to configure and start execution. The instance can be configured through the fluent interface, property accessors, or options argument in the constructor. Execution begins when `start()` is invoked and follows these high-level steps: 
@@ -82,8 +82,9 @@ const results = await pool.start();
 3. Call the start() method and wait for results.
 
 #### Pool Properties
-- Tasks: an array of task objects formatted into the expected task structure. Defaults to `[]` if not specified.
-    - _Requirements: Must be `Array`_
+- Tasks: a collection of task objects formatted into the expected task structure. Defaults to `[]` if not specified.
+    - _Requirements: Must be `Iterable`_
+    - _Note: `AsyncIterable` is supported. However, the pool won't start executing until the `AsyncIterable` is consumed_
 - Concurrency: the maximum number of tasks that can run at once. Defaults to `100` if not specified.
     - _Requirements: Must be a `Number` greater than or equal to 1_
 - Priority: switches the order of execution for each task from FIFO to the order defined by the comparator. Defaults to `false` if not specified.
@@ -109,13 +110,13 @@ Leverages [Promise.allSettled()](https://developer.mozilla.org/en-US/docs/Web/Ja
 ### Data Structure Implementation Details
 #### Queue
 - Uses a singly linked list implementation under the hood to ensure constant time (`O(1)`) enqueue and dequeue.
-<!-- fromIterable -->
-- `fromArray()` runs in linear time (`O(n)`), as each element of the array has to be visited and inserted into the queue.
+
+- `fromIterable()` runs in linear time (`O(n)`), as each element of the array has to be visited and inserted into the queue.
 
 #### Priority Queue
 - Uses an array-based heap implementation under the hood to ensure logarithmic time (`O(log(n))`) enqueue and dequeue.
-<!-- fromIterable -->
-- `fromArray()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the array.
+
+- `fromIterable()` runs in linear time (`O(n)`), as the bottom-up heap construction algorithm is used to heapify the iterable.
 
 ### Supported Node Versions
 Developed and built with Node 21 and tested against Node 18, 20, and 22, the current and LTS releases at the time of writing this.
@@ -124,10 +125,9 @@ Developed and built with Node 21 and tested against Node 18, 20, and 22, the cur
 <!--_Note: While not tested, this library should be compatible with Node 16. The library uses ES6 features that have been officially supported since Node 13, including ESM, async/await, and classes._-->
 
 ### Planned Enhancements
-1. Allow input iterables instead of just `Array`
-2. Task timeout
-3. Task started and finished callbacks
-4. Runtime statistics
+1. Task timeout
+2. Task started and finished callbacks
+3. Runtime statistics
 
 ### Contributing and Feedback
 All constructive feedback is appreciated. Please submit an issue and I will follow-up as soon as possible.

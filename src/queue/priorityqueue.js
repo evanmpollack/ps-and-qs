@@ -34,15 +34,18 @@ export default class PriorityQueue {
     }
 
     /**
-     * Creation method to build a priority queue from an array.
+     * Creation method to build a priority queue from an iterable.
      * Ordering defined by comparator.
      * 
-     * @param {Array} array 
+     * @param {Iterable | AsyncIterable} iterable 
      * @param {Function} comparator 
-     * @returns {PriorityQueue}
+     * @returns {Promise<PriorityQueue>}
      */
-    static fromArray(array, comparator) {
-        const copy = Array.from(array);
+    static async fromIterable(iterable, comparator) {
+        const copy = [];
+        for await (const item of iterable) {
+            copy.push(item);
+        }
         const instance = new PriorityQueue(comparator);
         instance.#heap = PriorityQueue.#heapify(copy, instance.#comparator);
         return instance;
@@ -151,9 +154,33 @@ export default class PriorityQueue {
      * 
      * Note: sorting a heap is O(nlog(n)) regardless if you copy the heap and repeatedly dequeue
      * or if you sort the array using standard Array methods.
+     * 
+     * Current Complexity: O(nlog(n) + O(n)) => O(nlog(n))
+     * 
+     * Copy approaches considered:
+     * - Using fromIterator: 
+     *      - Doesn't work without making priority queue async iterable
+     *      - Time Complexity: 
+     *          - Heap Copy: O(2n) => O(n)
+     *          - Read every element: O(nlog(n))
+     *          - Total: O(nlog(n))
+     * - Using Array.toSorted:
+     *      - Doesn't work with undefined, as comparator isn't applied to undefined values even if it's accounted for in comparator
+     *      - Time Complexity:
+     *          - Heap Copy: O(nlog(n))
+     *          - Read every element: O(n)
+     *          - Total: O(nlog(n))
+     * - Creating an empty priority queue and enqueuing each item in array:
+     *      - Works well
+     *      - Time Complexity
+     *          - Heap Copy: O(n)
+     *          - Read every element: O(nlog(n))
+     *          - Total: O(nlog(n))
      */
     *[Symbol.iterator]() {
-        const copy = PriorityQueue.fromArray(this.#heap, this.#comparator);
+        const copy = new PriorityQueue(this.#comparator);
+        // O(n) because enqueue will be O(1), as no shifting will have to take place due to level order traversal property
+        this.#heap.forEach(item => copy.enqueue(item));
         while(!copy.empty) {
             yield copy.dequeue();
         }
