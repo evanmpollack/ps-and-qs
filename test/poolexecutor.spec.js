@@ -57,13 +57,13 @@ const createTaskResult = (message, error=false) => {
  * Executes an array of tasks using PoolExecutor. 
  * If priority flag is true, a comparator must be provided.
  * 
- * @param {Array} array task array
+ * @param {Iterable | AsyncIterable} iterable task array
  * @param {Boolean} priority flag to determine what type of queue to use
  * @param {Function} comparator ordering function to be used if priority is true
  * @returns {Promise<Object[]>} task results
  */
-const execute = async (array, priority=false, comparator=undefined) => {
-    const queue = (priority) ? PriorityQueue.fromArray(array, comparator) : Queue.fromArray(array);
+const execute = async (iterable, priority=false, comparator=undefined) => {
+    const queue = await ((priority) ? PriorityQueue.fromIterable(iterable, comparator) : Queue.fromIterable(iterable));
     const executor = new PoolExecutor(queue, concurrency);
     return await executor.start();
 };
