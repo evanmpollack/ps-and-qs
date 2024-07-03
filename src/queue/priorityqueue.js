@@ -161,7 +161,7 @@ export default class PriorityQueue {
      * - Using fromIterator: 
      *      - Doesn't work without making priority queue async iterable
      *      - Time Complexity: 
-     *          - Heap Copy: O(2n) => O(n)
+     *          - Heap Copy: O(3n) => O(n)
      *          - Read every element: O(nlog(n))
      *          - Total: O(nlog(n))
      * - Using Array.toSorted:
