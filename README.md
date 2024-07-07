@@ -78,7 +78,7 @@ const results = await pool.start();
 ### How to use
 
 1. Aggregate async jobs into the [expected task structure](#task-properties).
-2. Configure and create a Promise Pool.
+2. Create and configure a Promise Pool.
 3. Call the start() method and wait for results.
 
 #### Pool Properties
