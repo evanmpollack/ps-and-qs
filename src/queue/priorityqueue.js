@@ -1,11 +1,9 @@
 import EmptyQueueError from '../error/emptyqueueerror.js';
 
-/**
- * Partial implementation of a priority queue based on the Priority Queue ADT
- *  - Backed by binary heap
- */
 export default class PriorityQueue {
+    /** @type {any[]} */
     #heap;
+    /** @type {Function} */
     #comparator;
 
     /**
@@ -26,6 +24,7 @@ export default class PriorityQueue {
      * Initializes an empty priority queue. Ordering is imposed by the
      * given comparator.
      * 
+     * @constructor PriorityQueue
      * @param {Function} comparator 
      */
     constructor(comparator) {
@@ -37,7 +36,7 @@ export default class PriorityQueue {
      * Creation method to build a priority queue from an iterable.
      * Ordering defined by comparator.
      * 
-     * @param {Iterable | AsyncIterable} iterable 
+     * @param {Iterable<any> | AsyncIterable<any>} iterable 
      * @param {Function} comparator 
      * @returns {Promise<PriorityQueue>}
      */
@@ -77,9 +76,9 @@ export default class PriorityQueue {
     /**
      * Applies the bottom-up heap construction algorithm to an array using the given comparator.
      * 
-     * @param {Array} array 
+     * @param {any[]} array 
      * @param {Function} comparator 
-     * @returns {Array}
+     * @returns {any[]}
      */
     static #heapify(array, comparator) {
         let lastInternalIndex = Math.floor((array.length / 2)) - 1;
@@ -91,7 +90,7 @@ export default class PriorityQueue {
      * Moves the last element up the heap (decreases index/key) as long as it has a parent
      * and should be closer to the root of the heap than the parent according to the provided comparator.
      * 
-     * @param {Array} array 
+     * @param {any[]} array 
      * @param {Function} comparator 
      */
     static #siftUp(array, comparator) {
@@ -109,8 +108,8 @@ export default class PriorityQueue {
      * and should be further from the root of the heap than the selected child according
      * to the given comparator.
      * 
-     * @param {Array} array 
-     * @param {Number} index 
+     * @param {any[]} array 
+     * @param {number} index 
      * @param {Function} comparator 
      */
     static #siftDown(array, index, comparator) {
@@ -139,9 +138,9 @@ export default class PriorityQueue {
     /**
      * Swaps the values at the given indices in the array.
      * 
-     * @param {Array} array 
-     * @param {Number} i 
-     * @param {Number} j 
+     * @param {any[]} array 
+     * @param {number} i 
+     * @param {number} j 
      */
     static #swap(array, i, j) {
         const temp = array[i];
