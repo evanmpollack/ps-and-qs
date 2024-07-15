@@ -8,7 +8,6 @@ const DEFAULT_CONCURRENCY = 100;
 const DEFAULT_PRIORITY = false;
 const DEFAULT_COMPARATOR = (taskA, taskB) => taskB.priority - taskA.priority;
 
-// Move to .d.ts file?
 /**
  * @typedef {Object} Task
  * @property {number} [priority]

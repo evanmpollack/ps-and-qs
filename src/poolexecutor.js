@@ -15,7 +15,10 @@ export default class PoolExecutor {
     /**
      * Initializes a PoolExecutor.
      * 
-     * @param {Queue | PriorityQueue} queue
+     * Note: queue type should be Queue | PriorityQueue or be the Queue Interface.
+     *  - could not figure out how to implement Queue interface with jsdoc or declaration files
+     * 
+     * @param {any} queue
      * @param {Number} concurrency  
      */
     constructor(queue, concurrency) {
@@ -29,7 +32,7 @@ export default class PoolExecutor {
      * limit and number of tasks. Each task recursively starts the next 
      * one as long as there are tasks still in the queue.
      * 
-     * @returns {Promise<PromiseSettledResult[]>}
+     * @returns {Promise<PromiseSettledResult<any>[]>}
      */
     async start() {
         const limit = Math.min(this.#concurrency, this.#queue.size);
@@ -65,7 +68,7 @@ export default class PoolExecutor {
      * 
      * Note: invalid task means no task property or task property is not a function.
      * 
-     * @param {*} element - task object
+     * @param {any} element - task object
      * @returns {Function} - task function
      */
     #getTask(element) {
@@ -89,7 +92,7 @@ export default class PoolExecutor {
      * Runs a given task using the Promise API and returns the result.
      * 
      * @param {Function} task - task function
-     * @returns {Promise<PromiseSettledResult>} - task result
+     * @returns {Promise<PromiseSettledResult<any>>} - task result
      */
     async #runTask(task) {
         let result;
