@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "baseUrl": ".",
+        "target": "ES2020"
+    },
+    "include": ["src/**/*"]
+}
