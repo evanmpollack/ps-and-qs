@@ -1,18 +1,21 @@
 import EmptyQueueError from '../error/emptyqueueerror.js';
 
 /**
- * Partial implementation of a standard queue based on the Queue ADT
- *  - Backed by singly linked list
+ * @typedef {Object} Node
+ * @property {any} data
+ * @property {?Node} next
  */
+
 export default class Queue {
+    /** @type {Node} */
     #head;
+    /** @type {Node} */
     #tail;
+    /** @type {number} */
     #size;
 
     /**
      * Gets the size of the queue.
-     * 
-     * @returns {Number}
      */
     get size() {
         return this.#size;
@@ -20,13 +23,16 @@ export default class Queue {
 
     /**
      * Determines whether or not the queue is empty.
-     * 
-     * @returns {Boolean}
      */
     get empty() {
         return !this.size;
     }
 
+    /**
+     * Initializes a FIFO queue.
+     * 
+     * @constructor Queue
+     */
     constructor() {
         this.#head = null;
         this.#tail = null;
