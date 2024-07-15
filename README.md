@@ -128,6 +128,7 @@ Developed and built with Node 21 and tested against Node 18, 20, and 22, the cur
 1. Task timeout
 2. Task started and finished callbacks
 3. Runtime statistics
+4. Improve typings and add support for library consumers using TypeScript 
 
 ### Contributing and Feedback
 All constructive feedback is appreciated. Please submit an issue and I will follow-up as soon as possible.
