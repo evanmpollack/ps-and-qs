@@ -1,5 +1,3 @@
-import Queue from './queue/queue.js';
-import PriorityQueue from './queue/priorityqueue.js';
 import PoolExecutor from './poolexecutor.js';
 import PromisePoolError from './error/promisepoolerror.js';
 
@@ -19,6 +17,8 @@ export default class PromisePool {
     #tasks;
     /** @type {number} */
     #concurrency;
+    /** @type {number | undefined} */
+    #timeout;
     /** @type {boolean} */
     #priority;
     /** @type {Function} */
@@ -54,6 +54,22 @@ export default class PromisePool {
      */
     get concurrency() {
         return this.#concurrency;
+    }
+
+    /** 
+     * Validates and sets the task timeout associated with this promise pool.
+    */
+    set timeout(timeout) {
+        if (typeof timeout !== 'number' && typeof timeout !== 'undefined') throw new PromisePoolError('Timeout must be a Number');
+        if (timeout && timeout <= 0) throw new PromisePoolError('Task timeout must be greater than 0');
+        this.#timeout = timeout;
+    }
+
+    /**
+     * Gets the task timeout associated with this promise pool.
+     */
+    get timeout() {
+        return this.#timeout;
     }
 
     /**
@@ -92,15 +108,20 @@ export default class PromisePool {
      * @constructor PromisePool
      * @param {Iterable<Task> | AsyncIterable<Task>} [tasks=DEFAULT_TASKS] - the collection of tasks to run
      * @param {Object} [options] - configuration object
-     * @param {number} [options.concurrency=DEFAULT_CONCURRENCY] - number greater than 0
+     * @param {number} [options.concurrency=DEFAULT_CONCURRENCY] - how many tasks should be run at once
+     * @param {number} [options.timeout] - number of milliseconds to wait for a task to complete before it terminates
      * @param {boolean} [options.priority=DEFAULT_PRIORITY] - flag that determines if tasks should be executed by priority
      * @param {Function} [options.comparator=DEFAULT_COMPARATOR] - sorting function for tasks with priority
      */
-    constructor(tasks, { concurrency, priority, comparator }={}) {
+    constructor(tasks, { concurrency, timeout, priority, comparator }={}) {
+        // Required during execution
         this.tasks = tasks ?? DEFAULT_TASKS;
         this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
         this.priority = priority ?? DEFAULT_PRIORITY;
         this.comparator = comparator ?? DEFAULT_COMPARATOR;
+
+        // Optional during execution
+        this.timeout = timeout;
     }
 
     /**
@@ -127,24 +148,43 @@ export default class PromisePool {
     /**
      * Sets the concurrency limit associated with a promise pool instance.
      * 
-     * @param {number} limit - number greater than 0
+     * @param {number} concurrency - number greater than 0
      * @returns {PromisePool}
      */
-    withConcurrency(limit) {
-        this.concurrency = limit;
+    withConcurrency(concurrency) {
+        this.concurrency = concurrency;
         return this;
     }
 
     /**
      * Creates a promise pool instance with the concurrency limit associated to it.
      * 
-     * @param {number} limit - number greater than 0 
+     * @param {number} concurrency - number greater than 0 
      * @returns {PromisePool}
      */
-    static withConcurrency(limit) {
-        return new this(undefined, { 
-            concurrency: limit
-        });
+    static withConcurrency(concurrency) {
+        return new this(undefined, { concurrency });
+    }
+
+    /**
+     * Sets the task timeout associated with a promise pool.
+     * 
+     * @param {number} timeout - number greater than 0
+     * @returns {PromisePool}
+     */
+    withTaskTimeout(timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Creates a promise pool instance with the task timeout associated to it.
+     * 
+     * @param {number} timeout - number greater than 0
+     * @returns {PromisePool}
+     */
+    static withTaskTimeout(timeout) {
+        return new this(undefined, { timeout });
     }
 
     /**
@@ -163,9 +203,8 @@ export default class PromisePool {
      * @returns {PromisePool}
      */
     static withPriority() {
-        return new this(undefined, {
-            priority: true
-        });
+        const priority = true;
+        return new this(undefined, { priority });
     }
 
     /**
@@ -186,9 +225,7 @@ export default class PromisePool {
      * @returns {PromisePool}
      */
     static withComparator(comparator) {
-        return new this(undefined, {
-            comparator: comparator
-        });
+        return new this(undefined, { comparator });
     }
 
     /**
@@ -197,7 +234,6 @@ export default class PromisePool {
      * @returns {Promise<PromiseSettledResult<any>[]>}
      */
     async start() {
-        const queue = await ((this.priority) ? PriorityQueue.fromIterable(this.tasks, this.comparator) : Queue.fromIterable(this.tasks));
-        return await (new PoolExecutor(queue, this.concurrency)).start();
+        return await (new PoolExecutor(this)).start();
     }
 }
