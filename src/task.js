@@ -1,3 +1,23 @@
+/**
+ * @typedef {Object} FormattedTask
+ * @property {Function} task
+ * @property {Function} [cancelTimeout]
+ */
+
+/**
+ * Tries to get the task from the task property in the given element.
+ * If it can't find the task property, it returns a task that will reject 
+ * when executed. If the task property is not a function, it returns a 
+ * task that will resolve when executed.
+ * 
+ * Allows for additional control over result values/reasons when given an
+ * invalid task.
+ * 
+ * Note: invalid task means no task property or task property is not a function.
+ * 
+ * @param {import('./promisepool').Task} element - unformatted task object
+ * @returns {FormattedTask} - formatted task object
+ */
 const format = (element) => {
     const target = 'task';
     let task;
@@ -11,10 +31,19 @@ const format = (element) => {
         task = element.task;
     }
 
-    return task;
+    return { task };
 };
 
-const addTimeout = (task, timeout) => {
+/**
+ * Decorator for FormattedTask that adds a timeout to the task.
+ * The resulting FormattedTask also has a timeout canceller should the 
+ * original task finish before the timer runs out.
+ * 
+ * @param {FormattedTask} task 
+ * @param {number} timeout 
+ * @returns {FormattedTask}
+ */
+const addTimeout = ({ task }, timeout) => {
     let timeoutId;
     const timeoutPromise = () => {
         return new Promise((_, reject) => {
@@ -24,17 +53,26 @@ const addTimeout = (task, timeout) => {
         });
     }
     return {
-        task: Promise.race.bind(null, task, timeoutPromise),
-        canceller: clearTimeout.bind(null, timeoutId)
+        // Why doesn't this work with bind?
+        task: () => Promise.race([task(), timeoutPromise()]),
+        cancelTimeout: () => clearTimeout(timeoutId)
     };
 };
 
+/**
+ * Formats an unformatted task by extracting the task property,
+ * handling task objects that aren't immediately executable, and
+ * adding a timeout and timeout canceller to the extracted task property 
+ * if one is provided.
+ * 
+ * @param {import('./promisepool').Task} element 
+ * @param {number} timeout 
+ * @returns {FormattedTask}
+ */
 const createTask = (element, timeout) => {
-    let task = format(element);
-    // Adjust when I figure out default
-    if (timeout) {
-        // Will not be cancellable
-        task = addTimeout(task, timeout).task;
-    }
-    return task;
+    return (!timeout) ? format(element) : addTimeout(format(element), timeout); 
+};
+
+export {
+    createTask
 };
