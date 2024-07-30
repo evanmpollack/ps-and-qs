@@ -6,18 +6,12 @@ const DEFAULT_CONCURRENCY = 100;
 const DEFAULT_PRIORITY = false;
 const DEFAULT_COMPARATOR = (taskA, taskB) => taskB.priority - taskA.priority;
 
-/**
- * @typedef {Object} Task
- * @property {number} [priority]
- * @property {Function} task
- */
-
 export default class PromisePool {
-    /** @type {Iterable<Task> | AsyncIterable<Task>} */
+    /** @type {Iterable<{task: Function, priority?: number}> | AsyncIterable<{task: Function, priority?: number}>} */
     #tasks;
     /** @type {number} */
     #concurrency;
-    /** @type {number | undefined} */
+    /** @type {number=} */
     #timeout;
     /** @type {boolean} */
     #priority;
@@ -106,7 +100,7 @@ export default class PromisePool {
      * Create and configure a PromisePool.
      * 
      * @constructor PromisePool
-     * @param {Iterable<Task> | AsyncIterable<Task>} [tasks=DEFAULT_TASKS] - the collection of tasks to run
+     * @param {Iterable<{task: Function, priority?: number}> | AsyncIterable<{task: Function, priority?: number}>} [tasks=DEFAULT_TASKS] - the collection of tasks to run
      * @param {Object} [options] - configuration object
      * @param {number} [options.concurrency=DEFAULT_CONCURRENCY] - how many tasks should be run at once
      * @param {number} [options.timeout] - number of milliseconds to wait for a task to complete before it terminates
@@ -127,7 +121,7 @@ export default class PromisePool {
     /**
      * Sets the collection of tasks associated with a promise pool instance.
      * 
-     * @param {Iterable<Task> | AsyncIterable<Task>} tasks - collection of tasks
+     * @param {Iterable<{task: Function, priority?: number}> | AsyncIterable<{task: Function, priority?: number}>} tasks - collection of tasks
      * @returns {PromisePool}
      */
     withTasks(tasks) {
@@ -138,7 +132,7 @@ export default class PromisePool {
     /**
      * Creates a promise pool instance with the collection of tasks associated to it.
      * 
-     * @param {Iterable<Task> | AsyncIterable<Task>} tasks - collection of tasks
+     * @param {Iterable<{task: Function, priority?: number}> | AsyncIterable<{task: Function, priority?: number}>} tasks - collection of tasks
      * @returns {PromisePool}
      */
     static withTasks(tasks) {

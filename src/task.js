@@ -1,5 +1,5 @@
 /**
- * @typedef {Object} FormattedTask
+ * @typedef {Object} Task
  * @property {Function} task
  * @property {Function} [cancelTimeout]
  */
@@ -15,8 +15,8 @@
  * 
  * Note: invalid task means no task property or task property is not a function.
  * 
- * @param {import('./promisepool').Task} element - unformatted task object
- * @returns {FormattedTask} - formatted task object
+ * @param {{ task: Function }} element - unformatted task object
+ * @returns {Task} - formatted task object
  */
 const format = (element) => {
     const target = 'task';
@@ -35,13 +35,13 @@ const format = (element) => {
 };
 
 /**
- * Decorator for FormattedTask that adds a timeout to the task.
- * The resulting FormattedTask also has a timeout canceller should the 
+ * Decorator for Task that adds a timeout to the task.
+ * The resulting Task also has a timeout canceller should the 
  * original task finish before the timer runs out.
  * 
- * @param {FormattedTask} task 
+ * @param {Task} task 
  * @param {number} timeout 
- * @returns {FormattedTask}
+ * @returns {Task}
  */
 const addTimeout = ({ task }, timeout) => {
     let timeoutId;
@@ -65,9 +65,9 @@ const addTimeout = ({ task }, timeout) => {
  * adding a timeout and timeout canceller to the extracted task property 
  * if one is provided.
  * 
- * @param {import('./promisepool').Task} element 
+ * @param {{ task: Function }} element 
  * @param {number} timeout 
- * @returns {FormattedTask}
+ * @returns {Task}
  */
 const createTask = (element, timeout) => {
     return (!timeout) ? format(element) : addTimeout(format(element), timeout); 
