@@ -1,29 +1,20 @@
-export default class PoolExecutor {
-    #queue;
-    #concurrency;
-    #results;
+import Queue from './queue/queue.js';
+import PriorityQueue from './queue/priorityqueue.js';
+import { createTask } from './task.js';
 
-    /**
-     * Checks if there are any tasks that haven't been executed yet.
-     * 
-     * @returns {Boolean}
-     */
-    get #tasksQueued() {
-        return !this.#queue.empty;
-    }
+export default class PoolExecutor {
+    /** @type {import('./promisepool').default} */
+    #pool;
+    /** @type {PromiseSettledResult<any>[]} */
+    #results;
 
     /**
      * Initializes a PoolExecutor.
      * 
-     * Note: queue type should be Queue | PriorityQueue or be the Queue Interface.
-     *  - could not figure out how to implement Queue interface with jsdoc or declaration files
-     * 
-     * @param {any} queue
-     * @param {Number} concurrency  
+     * @param {import('./promisepool').default} pool 
      */
-    constructor(queue, concurrency) {
-        this.#queue = queue;
-        this.#concurrency = concurrency;
+    constructor(pool) {
+        this.#pool = pool;
         this.#results = [];
     }
 
@@ -35,66 +26,38 @@ export default class PoolExecutor {
      * @returns {Promise<PromiseSettledResult<any>[]>}
      */
     async start() {
-        const limit = Math.min(this.#concurrency, this.#queue.size);
-        const executor = Array.from({ length: limit }, this.#execute.bind(this));
+        const { tasks, concurrency, priority, comparator } = this.#pool;
+        const queue = await ((priority) ? PriorityQueue.fromIterable(tasks, comparator) : Queue.fromIterable(tasks));
+        const limit = Math.min(concurrency, queue.size);
+        const executor = Array.from({ length: limit }, this.#execute.bind(this, queue));
         await Promise.all(executor);
         return this.#results;
     }
 
     /**
-     * Dequeues, extracts, and runs a task. Appends the result to the result array.
+     * Dequeues, formats, and runs a task. Appends the result to the result array.
      * Recursively executes until there are no more tasks in the queue.
      * 
      * Note: If limit > 1, this function will be run concurrently with (limit - 1) other calls.
      * 
+     * @param {Queue | PriorityQueue} queue - the queue to pull from
      * @returns {Promise<void>}
      */
-    async #execute() {
-        const next = this.#queue.dequeue();
-        const task = this.#getTask(next);
+    async #execute(queue) {
+        const next = queue.dequeue();
+        const task = createTask(next, this.#pool.timeout);
         const result = await this.#runTask(task);
         this.#results.push(result);
-        if (this.#tasksQueued) return this.#execute(); 
+        if (!queue.empty) return this.#execute(queue); 
     }
 
     /**
-     * Tries to get the task from the task property in the given element.
-     * If it can't find the task property, it returns a task that will reject 
-     * when executed. If the task property is not a function, it returns a 
-     * task that will resolve when executed.
+     * Runs a formatted task using the Promise API and returns the result.
      * 
-     * Allows for additional control over result values/reasons when given an
-     * invalid task.
-     * 
-     * Note: invalid task means no task property or task property is not a function.
-     * 
-     * @param {any} element - task object
-     * @returns {Function} - task function
-     */
-    #getTask(element) {
-        let target = 'task';
-        let task;
-
-        // Explicit check for null because typeof null === 'object' and calling in on null throws error
-        // Uses in instead of hasOwnProperty to account for inherited task property
-        if (element === null || typeof element !== 'object' || !(target in element)) {
-            task = () => Promise.reject(`Cannot find ${target} property in ${JSON.stringify(element)}`);
-        } else if (typeof element.task !== 'function') {
-            task = () => Promise.resolve(element.task);
-        } else {
-            task = element.task;
-        }
-        
-        return task;
-    }
-
-    /**
-     * Runs a given task using the Promise API and returns the result.
-     * 
-     * @param {Function} task - task function
+     * @param {import('./task.js').Task} task
      * @returns {Promise<PromiseSettledResult<any>>} - task result
      */
-    async #runTask(task) {
+    async #runTask({ task, cancelTimeout }) {
         let result;
         try {
             result = await Promise.allSettled([task()]);
@@ -102,6 +65,7 @@ export default class PoolExecutor {
             // Only runs if a synchronous task throws an error
             result = await Promise.allSettled([Promise.reject(e)]);
         }
+        cancelTimeout?.();
         return result[0];
     }
 }
